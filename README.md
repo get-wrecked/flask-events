@@ -28,3 +28,10 @@ def main():
 ```
 
 It logs to a logger called `<app-name>.canonical`, configure your logging to forward this to syslog or a log file or stdout however you like.
+
+
+Development
+-----------
+
+    $ ./configure
+    $ ./test

@@ -1,0 +1,15 @@
+#!/bin/sh
+
+set -eu
+
+main () {
+    create_virtualenv
+}
+
+create_virtualenv () {
+    test -d venv \
+        || virtualenv venv -p $(which python3)
+    ./venv/bin/pip install -r dev-requirements.txt
+}
+
+main
