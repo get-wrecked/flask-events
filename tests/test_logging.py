@@ -19,6 +19,15 @@ def test_logger_unconfigured(client):
     assert_matches(logs, 'measure#timing_total', r'^0.\d{3}s$')
 
 
+def test_custom_tag(app, client):
+    with LogCapture() as logs:
+        with app.test_request_context('/'):
+            app.preprocess_request()
+            app.canonical_logger.tag = 'mytag'
+
+    assert_logged(logs, 'tag', 'mytag')
+
+
 def assert_logged(logs, key, value):
     item = get_item(logs, key)
     assert item == value

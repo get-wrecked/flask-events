@@ -12,14 +12,14 @@ warnings.filterwarnings('error', module='cachish')
 
 def app_init_direct():
     _app = create_app()
-    CanonicalLogger(_app)
+    _app.canonical_logger = CanonicalLogger(_app)
     return _app
 
 
 def app_factory():
     _app = create_app()
-    canonical_logger = CanonicalLogger()
-    canonical_logger.init_app(_app)
+    _app.canonical_logger = CanonicalLogger()
+    _app.canonical_logger.init_app(_app)
     return _app
 
 
