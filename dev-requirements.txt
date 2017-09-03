@@ -2,6 +2,7 @@
 
 flask
 testfixtures
+pylint
 pytest
 pytest-cov
 watchdog
