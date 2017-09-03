@@ -1,6 +1,7 @@
 -e .
 
 flask
+flask-sqlalchemy
 testfixtures
 pylint
 pytest
