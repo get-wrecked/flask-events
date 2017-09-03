@@ -4,7 +4,7 @@ import logging.config
 import os
 import base64
 
-from flask import Flask, jsonify, redirect
+from flask import Flask, jsonify, redirect, abort, request
 from flask_canonical import CanonicalLogger
 from flask_sqlalchemy import SQLAlchemy
 
@@ -60,6 +60,18 @@ def add_random():
     return redirect('/')
 
 
+@app.route('/abort')
+def abort_503():
+    abort(503)
+
+
+@app.route('/crash')
+def crash():
+    message = request.args.get('message', 'no message')
+    raise ValueError(message)
+
+
 if __name__ == '__main__':
     db.create_all()
-    app.run(debug=True)
+    print('* Listening on 127.0.0.1:5000')
+    app.run(use_reloader=True)
