@@ -56,6 +56,14 @@ def test_add_sample(app):
     assert_logged(logs, 'sample#counter', '3')
 
 
+def test_aborted_view(client):
+    with LogCapture() as logs:
+        response = client.get('/abort')
+    assert response.status_code == 503
+
+    assert_logged(logs, 'status', '503')
+
+
 def assert_logged(logs, key, value):
     item = get_item(logs, key)
     assert item == value

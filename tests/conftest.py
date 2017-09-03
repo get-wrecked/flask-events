@@ -1,7 +1,7 @@
 import warnings
 
 import pytest
-from flask import Flask
+from flask import Flask, abort
 
 from flask_canonical import CanonicalLogger
 
@@ -29,6 +29,10 @@ def create_app():
     @_app.route('/')
     def main_route(): # pylint: disable=unused-variable
         return 'Hello, world'
+
+    @_app.route('/abort')
+    def crash():
+        raise abort(503)
 
     return _app
 
