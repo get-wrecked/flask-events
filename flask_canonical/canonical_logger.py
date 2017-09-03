@@ -73,6 +73,10 @@ class CanonicalLogger(object):
             ('request_user_agent', request.headers.get('user-agent')),
         ))
 
+        request_id = request.headers.get('x-request-id')
+        if request_id:
+            params['request_id'] = request_id
+
         timing_database = get_prop('canonical_timing_database')
         if timing_database:
             self.add_measure('timing_database', timing_database)

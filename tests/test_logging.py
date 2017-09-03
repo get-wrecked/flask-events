@@ -28,6 +28,16 @@ def test_custom_tag(app):
     assert_logged(logs, 'tag', 'mytag')
 
 
+def test_includes_request_id(client):
+    with LogCapture() as logs:
+        response = client.get('/', headers={
+            'x-request-id': 'myrequestid',
+        })
+    assert response.status_code == 200
+
+    assert_logged(logs, 'request_id', 'myrequestid')
+
+
 def test_add_custom_value(app):
     with LogCapture() as logs:
         with app.test_request_context('/'):
