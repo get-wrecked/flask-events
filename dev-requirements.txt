@@ -6,4 +6,5 @@ testfixtures
 pylint
 pytest
 pytest-cov
+twine
 watchdog
