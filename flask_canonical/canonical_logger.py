@@ -49,6 +49,10 @@ class CanonicalLogger(object):
         add_extra('measure#%s' % key, '%.3fs' % value)
 
 
+    def add_sample(self, key, value):
+        add_extra('sample#%s' % key, value)
+
+
     @property
     def tag(self): # pylint: disable=no-self-use
         return get_prop('canonical_tag') or get_default_tag(self.app)
