@@ -8,7 +8,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='Flask-Canonical',
-    version='0.1.0',
+    version='0.1.1',
     author='Tarjei Husøy',
     author_email='git@thusoy.com',
     url='https://github.com/megacool/flask-canonical',
