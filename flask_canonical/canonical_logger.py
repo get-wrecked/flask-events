@@ -19,6 +19,12 @@ WHITESPACE_RE = re.compile(r'\s')
 
 
 class CanonicalLogger(object):
+    '''
+    Helper class to log canonical log lines for each request.
+    '''
+    # A couple of the methods here don't use self since the state during the
+    # request is stored on the application context for thread safety, but are
+    # kept as methods since the API is better that way.
 
     def __init__(self, app=None):
         if app is not None:
@@ -28,41 +34,28 @@ class CanonicalLogger(object):
     def init_app(self, app):
         self.app = app
 
-        app.before_request(self._before_request)
-        app.after_request(self._after_request)
+        app.before_request(_before_request)
+        app.after_request(_after_request)
         app.teardown_request(self._teardown_request)
 
         self.logger = getLogger('%s.canonical' % app.name)
 
 
-    def _before_request(self):
-        store_prop('canonical_start_time', time.time())
+    def add(self, key, value): # pylint: disable=no-self-use
+        add_extra(key, value)
 
 
-    def _after_request(self, response):
-        store_prop('canonical_response_status', response.status_code)
-        return response
-
-
-    def add(self, key, value):
-        self._add_extra(key, value)
-
-
-    def add_measure(self, key, value):
-        self._add_extra('measure#%s' % key, '%.3fs' % value)
-
-
-    def _add_extra(self, key, value):
-        get_context().setdefault('canonical_log_extra', []).append((key, value))
+    def add_measure(self, key, value): # pylint: disable=no-self-use
+        add_extra('measure#%s' % key, '%.3fs' % value)
 
 
     @property
-    def tag(self):
+    def tag(self): # pylint: disable=no-self-use
         return get_prop('canonical_tag') or get_default_tag(self.app)
 
 
     @tag.setter
-    def tag(self, tag):
+    def tag(self, tag): # pylint: disable=no-self-use
         store_prop('canonical_tag', tag)
 
 
@@ -91,6 +84,19 @@ class CanonicalLogger(object):
 
         log_line_items = (format_key_value_pair(key, val) for (key, val) in params.items())
         self.logger.info(' '.join(log_line_items))
+
+
+def _before_request():
+    store_prop('canonical_start_time', time.time())
+
+
+def _after_request(response):
+    store_prop('canonical_response_status', response.status_code)
+    return response
+
+
+def add_extra(key, value):
+    get_context().setdefault('canonical_log_extra', []).append((key, value))
 
 
 def store_prop(key, value):
@@ -128,14 +134,15 @@ def get_view_function(app, url, method):
     it will be called with, or None if there is no view.
     Creds: http://stackoverflow.com/a/38488506
     """
+    # pylint: disable=too-many-return-statements
 
     adapter = app.create_url_adapter(request)
 
     try:
         match = adapter.match(url, method=method)
-    except RequestRedirect as e:
+    except RequestRedirect as ex:
         # recursively match redirects
-        return get_view_function(app, e.new_url, method)
+        return get_view_function(app, ex.new_url, method)
     except (MethodNotAllowed, NotFound):
         # no match
         return None

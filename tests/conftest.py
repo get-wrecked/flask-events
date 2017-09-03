@@ -1,6 +1,4 @@
 import warnings
-import shutil
-import tempfile
 
 import pytest
 from flask import Flask
@@ -14,7 +12,7 @@ warnings.filterwarnings('error', module='cachish')
 
 def app_init_direct():
     _app = create_app()
-    canonical_logger = CanonicalLogger(_app)
+    CanonicalLogger(_app)
     return _app
 
 
@@ -26,13 +24,13 @@ def app_factory():
 
 
 def create_app():
-    app = Flask('test_app')
+    _app = Flask('test_app')
 
-    @app.route('/')
-    def main_route():
+    @_app.route('/')
+    def main_route(): # pylint: disable=unused-variable
         return 'Hello, world'
 
-    return app
+    return _app
 
 
 APPS = [

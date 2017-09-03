@@ -6,7 +6,7 @@ from testfixtures import LogCapture
 ITEM_RE = re.compile(r'([\w#]+)=(?:"([^"]*)"|([\w./-]*))')
 
 
-def test_logger_unconfigured(app, client):
+def test_logger_unconfigured(client):
     with LogCapture() as logs:
         response = client.get('/')
     assert response.status_code == 200
