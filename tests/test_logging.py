@@ -19,7 +19,7 @@ def test_logger_unconfigured(client):
     assert_matches(logs, 'measure#timing_total', r'^0.\d{3}s$')
 
 
-def test_custom_tag(app, client):
+def test_custom_tag(app):
     with LogCapture() as logs:
         with app.test_request_context('/'):
             app.preprocess_request()
@@ -28,8 +28,7 @@ def test_custom_tag(app, client):
     assert_logged(logs, 'tag', 'mytag')
 
 
-
-def test_add_custom_value(app, client):
+def test_add_custom_value(app):
     with LogCapture() as logs:
         with app.test_request_context('/'):
             app.preprocess_request()
@@ -38,7 +37,7 @@ def test_add_custom_value(app, client):
     assert_logged(logs, 'mykey', 'my-custom-value')
 
 
-def test_add_custom_value_with_spaces(app, client):
+def test_add_custom_value_with_spaces(app):
     with LogCapture() as logs:
         with app.test_request_context('/'):
             app.preprocess_request()
