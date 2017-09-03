@@ -1,5 +1,7 @@
 -e .
 
+flask
+testfixtures
 pytest
 pytest-cov
 watchdog
