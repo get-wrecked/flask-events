@@ -28,6 +28,26 @@ def test_custom_tag(app, client):
     assert_logged(logs, 'tag', 'mytag')
 
 
+
+def test_add_custom_value(app, client):
+    with LogCapture() as logs:
+        with app.test_request_context('/'):
+            app.preprocess_request()
+            app.canonical_logger.add('mykey', 'my-custom-value')
+
+    assert_logged(logs, 'mykey', 'my-custom-value')
+
+
+def test_add_custom_value_with_spaces(app, client):
+    with LogCapture() as logs:
+        with app.test_request_context('/'):
+            app.preprocess_request()
+            app.canonical_logger.add('mykey', 'my custom value')
+
+    assert_logged(logs, 'mykey', 'my custom value')
+    assert 'mykey="my custom value"' in logs.records[-1].msg
+
+
 def assert_logged(logs, key, value):
     item = get_item(logs, key)
     assert item == value
