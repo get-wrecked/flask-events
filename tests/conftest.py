@@ -7,7 +7,7 @@ from flask_canonical import CanonicalLogger
 
 
 # Ensure warnings are treated as errors when running tests
-warnings.filterwarnings('error', module='cachish')
+warnings.filterwarnings('error', module='flask_canonical')
 
 
 def app_init_direct():
