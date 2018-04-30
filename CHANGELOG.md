@@ -1,7 +1,7 @@
 Changelog
 =========
 
-# UNRELEASED
+# 0.1.2 - 2018-04-30
 
 ## Fixed
 - Crash if query parameters include invalid utf-8.
