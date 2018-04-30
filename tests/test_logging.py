@@ -79,7 +79,7 @@ def test_invalid_utf8(client):
         response = client.get(b'/?param=\xEA')
         assert response.status_code == 200
 
-    assert 'path=/?param=\\xea' in logs.records[-1].msg
+    assert 'path="/?param=\\xea"' in logs.records[-1].msg
 
 
 def assert_logged(logs, key, value):

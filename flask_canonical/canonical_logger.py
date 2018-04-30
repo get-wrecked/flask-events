@@ -15,7 +15,7 @@ except ImportError:
     pass
 
 
-WHITESPACE_RE = re.compile(r'\s')
+NEEDS_QUOTES_RE = re.compile(r'[\s=]')
 
 
 class CanonicalLogger(object):
@@ -174,7 +174,7 @@ def format_key_value_pair(key, value):
     else:
         value = ''
 
-    should_quote = WHITESPACE_RE.search(value)
+    should_quote = NEEDS_QUOTES_RE.search(value)
 
     if should_quote:
         value = '"%s"' % value
