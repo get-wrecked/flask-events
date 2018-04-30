@@ -64,11 +64,17 @@ class CanonicalLogger(object):
 
 
     def _teardown_request(self, exception):
+        # Don't use request.full_path since it fails to decode invalid utf-8
+        # paths (as of werkzeug 0.15)
+        full_path = request.path
+        if request.args:
+            full_path += '?' + request.query_string.decode('utf-8', 'backslashreplace')
+
         params = OrderedDict((
             ('fwd', ','.join(request.access_route)),
             ('tag', self.tag),
             ('method', request.method),
-            ('path', request.full_path if request.args else request.path),
+            ('path', full_path),
             ('status', get_prop('canonical_response_status', 500)),
             ('request_user_agent', request.headers.get('user-agent')),
         ))

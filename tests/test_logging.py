@@ -74,6 +74,14 @@ def test_aborted_view(client):
     assert_logged(logs, 'status', '503')
 
 
+def test_invalid_utf8(client):
+    with LogCapture() as logs:
+        response = client.get(b'/?param=\xEA')
+        assert response.status_code == 200
+
+    assert 'path=/?param=\\xea' in logs.records[-1].msg
+
+
 def assert_logged(logs, key, value):
     item = get_item(logs, key)
     assert item == value
