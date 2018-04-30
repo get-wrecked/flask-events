@@ -1,5 +1,8 @@
-import time
+import binascii
+import codecs
 import re
+import sys
+import time
 from collections import OrderedDict
 from logging import getLogger
 
@@ -29,6 +32,17 @@ class CanonicalLogger(object):
     def __init__(self, app=None):
         if app is not None:
             self.init_app(app)
+
+        self.error_handler = 'backslashreplace'
+        if sys.version_info < (3, 5, 0):
+            self.error_handler = 'custom-backslashreplace'
+
+            def custom_backslashreplace(exception):
+                '''Backport of backslashreplace for decoding'''
+                unencodable_part = exception.object[exception.start:exception.end]
+                return '\\x' + binascii.hexlify(unencodable_part).decode('ascii'), exception.end
+
+            codecs.register_error(self.error_handler, custom_backslashreplace)
 
 
     def init_app(self, app):
@@ -68,7 +82,7 @@ class CanonicalLogger(object):
         # paths (as of werkzeug 0.15)
         full_path = request.path
         if request.args:
-            full_path += '?' + request.query_string.decode('utf-8', 'backslashreplace')
+            full_path += '?' + request.query_string.decode('utf-8', self.error_handler)
 
         params = OrderedDict((
             ('fwd', ','.join(request.access_route)),
