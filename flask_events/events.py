@@ -49,7 +49,7 @@ class Events(object):
         app.after_request(_after_request)
         app.teardown_request(self._teardown_request)
 
-        self.outlets = [LogfmtOutlet(app)]
+        self.outlets = [LogfmtOutlet(app.name)]
 
 
     def add(self, key, value): # pylint: disable=no-self-use

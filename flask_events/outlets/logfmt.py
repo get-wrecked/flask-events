@@ -7,8 +7,8 @@ NEEDS_QUOTES_RE = re.compile(r'[\s=]')
 
 class LogfmtOutlet(object):
 
-    def __init__(self, app):
-        self.logger = getLogger('%s.canonical' % app.name)
+    def __init__(self, base_logger):
+        self.logger = getLogger('%s.canonical' % base_logger)
 
 
     def handle(self, event_data, measures, samples):
