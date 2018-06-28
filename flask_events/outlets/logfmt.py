@@ -1,4 +1,8 @@
+import re
+
 from logging import getLogger
+
+NEEDS_QUOTES_RE = re.compile(r'[\s=]')
 
 
 class LogfmtOutlet(object):
@@ -8,4 +12,19 @@ class LogfmtOutlet(object):
 
 
     def handle(self, event_data):
-        self.logger.info(' '.join(event_data))
+        log_line_items = (format_key_value_pair(key, val) for (key, val) in event_data.items())
+        self.logger.info(' '.join(log_line_items))
+
+
+def format_key_value_pair(key, value):
+    if value:
+        value = str(value)
+    else:
+        value = ''
+
+    should_quote = NEEDS_QUOTES_RE.search(value)
+
+    if should_quote:
+        value = '"%s"' % value
+
+    return '%s=%s' % (key, value)

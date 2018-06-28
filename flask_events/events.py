@@ -1,6 +1,5 @@
 import binascii
 import codecs
-import re
 import sys
 import time
 from collections import OrderedDict
@@ -17,8 +16,6 @@ try:
 except ImportError:
     pass
 
-
-NEEDS_QUOTES_RE = re.compile(r'[\s=]')
 
 
 class Events(object):
@@ -99,9 +96,8 @@ class Events(object):
             params['error'] = exception.__class__.__name__
             params['error_msg'] = str(exception)
 
-        log_line_items = (format_key_value_pair(key, val) for (key, val) in params.items())
         for outlet in self.outlets:
-            outlet.handle(log_line_items)
+            outlet.handle(params)
 
 
 def _before_request():
