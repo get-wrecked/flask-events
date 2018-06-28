@@ -11,7 +11,13 @@ class LogfmtOutlet(object):
         self.logger = getLogger('%s.canonical' % app.name)
 
 
-    def handle(self, event_data):
+    def handle(self, event_data, measures, samples):
+        for key, val in measures.items():
+            event_data['measure#%s' % key] = '%.3fs' % val
+
+        for key, val in samples.items():
+            event_data['sample#%s' % key] = val
+
         log_line_items = (format_key_value_pair(key, val) for (key, val) in event_data.items())
         self.logger.info(' '.join(log_line_items))
 

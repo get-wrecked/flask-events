@@ -57,11 +57,11 @@ class Events(object):
 
 
     def add_measure(self, key, value): # pylint: disable=no-self-use
-        add_extra('measure#%s' % key, '%.3fs' % value)
+        get_context().setdefault('canonical_log_measures', OrderedDict())[key] = value
 
 
-    def add_sample(self, key, value):
-        add_extra('sample#%s' % key, value)
+    def add_sample(self, key, value): # pylint: disable=no-self-use
+        get_context().setdefault('canonical_log_samples', OrderedDict())[key] = value
 
 
     def _teardown_request(self, exception):
@@ -92,12 +92,15 @@ class Events(object):
         for key, value in get_prop('canonical_log_extra', ()):
             params[key] = value
 
+        measures = get_prop('canonical_log_measures', {})
+        samples = get_prop('canonical_log_samples', {})
+
         if exception:
             params['error'] = exception.__class__.__name__
             params['error_msg'] = str(exception)
 
         for outlet in self.outlets:
-            outlet.handle(params)
+            outlet.handle(params, measures, samples)
 
 
 def _before_request():
