@@ -9,10 +9,24 @@ from flask_events import Events
 # Ensure warnings are treated as errors when running tests
 warnings.filterwarnings('error', module='flask_events')
 
+class TestOutlet(object):
+    def __init__(self):
+        self.event_data = None
+        self.measures = None
+        self.samples = None
+
+
+    def handle(self, event_data, measures, samples):
+        self.event_data = event_data
+        self.measures = measures
+        self.samples = samples
+
 
 def app_init_direct():
     _app = create_app()
     _app.events = Events(_app)
+    _app.test_outlet = TestOutlet()
+    _app.events.outlets = [_app.test_outlet]
     return _app
 
 
@@ -20,6 +34,8 @@ def app_factory():
     _app = create_app()
     _app.events = Events()
     _app.events.init_app(_app)
+    _app.test_outlet = TestOutlet()
+    _app.events.outlets = [_app.test_outlet]
     return _app
 
 
