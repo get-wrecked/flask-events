@@ -12,7 +12,6 @@ def test_logger_unconfigured(client):
     assert response.status_code == 200
 
     assert_logged(logs, 'fwd', '127.0.0.1')
-    assert_logged(logs, 'tag', 'main_route')
     assert_logged(logs, 'method', 'GET')
     assert get_item(logs, 'request_user_agent').startswith('werkzeug')
     assert_logged(logs, 'status', '200')
@@ -23,7 +22,7 @@ def test_custom_tag(app):
     with LogCapture() as logs:
         with app.test_request_context('/'):
             app.preprocess_request()
-            app.events.tag = 'mytag'
+            app.events.add('tag', 'mytag')
 
     assert_logged(logs, 'tag', 'mytag')
 

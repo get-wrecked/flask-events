@@ -7,7 +7,6 @@ from collections import OrderedDict
 from logging import getLogger
 
 from flask import request, _app_ctx_stack as stack
-from werkzeug.routing import RequestRedirect, MethodNotAllowed, NotFound
 
 HAS_SQLALCHEMY = False
 try:
@@ -67,16 +66,6 @@ class Events(object):
         add_extra('sample#%s' % key, value)
 
 
-    @property
-    def tag(self): # pylint: disable=no-self-use
-        return get_prop('canonical_tag') or get_default_tag(self.app)
-
-
-    @tag.setter
-    def tag(self, tag): # pylint: disable=no-self-use
-        store_prop('canonical_tag', tag)
-
-
     def _teardown_request(self, exception):
         # Don't use request.full_path since it fails to decode invalid utf-8
         # paths (as of werkzeug 0.15)
@@ -86,7 +75,6 @@ class Events(object):
 
         params = OrderedDict((
             ('fwd', ','.join(request.access_route)),
-            ('tag', self.tag),
             ('method', request.method),
             ('path', full_path),
             ('status', get_prop('canonical_response_status', 500)),
@@ -147,53 +135,6 @@ def get_context():
         setattr(app_context, 'canonical', _context)
 
     return _context
-
-
-def get_default_tag(app):
-    '''Get the name of the view function used to prevent having to set the tag
-    manually for every endpoint'''
-    view_func = get_view_function(app, request.path, request.method)
-    if view_func:
-        return view_func.__name__
-
-
-def get_view_function(app, url, method):
-    """Match a url and return the view and arguments
-    it will be called with, or None if there is no view.
-    Creds: http://stackoverflow.com/a/38488506
-    """
-    # pylint: disable=too-many-return-statements
-
-    adapter = app.create_url_adapter(request)
-
-    try:
-        match = adapter.match(url, method=method)
-    except RequestRedirect as ex:
-        # recursively match redirects
-        return get_view_function(app, ex.new_url, method)
-    except (MethodNotAllowed, NotFound):
-        # no match
-        return None
-
-    try:
-        return app.view_functions[match[0]]
-    except KeyError:
-        # no view is associated with the endpoint
-        return None
-
-
-def format_key_value_pair(key, value):
-    if value:
-        value = str(value)
-    else:
-        value = ''
-
-    should_quote = NEEDS_QUOTES_RE.search(value)
-
-    if should_quote:
-        value = '"%s"' % value
-
-    return '%s=%s' % (key, value)
 
 
 if HAS_SQLALCHEMY:
