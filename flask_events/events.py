@@ -17,6 +17,18 @@ except ImportError:
     pass
 
 
+if sys.version_info < (3, 5, 0):
+    ERROR_HANDLER = 'custom-backslashreplace'
+
+    def custom_backslashreplace(exception):
+        '''Backport of backslashreplace for decoding'''
+        unencodable_part = exception.object[exception.start:exception.end]
+        return '\\x' + binascii.hexlify(unencodable_part).decode('ascii'), exception.end
+
+    codecs.register_error(ERROR_HANDLER, custom_backslashreplace)
+else:
+    ERROR_HANDLER = 'backslashreplace'
+
 
 class Events(object):
     '''
@@ -29,17 +41,6 @@ class Events(object):
     def __init__(self, app=None):
         if app is not None:
             self.init_app(app)
-
-        self.error_handler = 'backslashreplace'
-        if sys.version_info < (3, 5, 0):
-            self.error_handler = 'custom-backslashreplace'
-
-            def custom_backslashreplace(exception):
-                '''Backport of backslashreplace for decoding'''
-                unencodable_part = exception.object[exception.start:exception.end]
-                return '\\x' + binascii.hexlify(unencodable_part).decode('ascii'), exception.end
-
-            codecs.register_error(self.error_handler, custom_backslashreplace)
 
 
     def init_app(self, app):
@@ -65,23 +66,7 @@ class Events(object):
 
 
     def _teardown_request(self, exception):
-        # Don't use request.full_path since it fails to decode invalid utf-8
-        # paths (as of werkzeug 0.15)
-        full_path = request.path
-        if request.args:
-            full_path += '?' + request.query_string.decode('utf-8', self.error_handler)
-
-        params = OrderedDict((
-            ('fwd', ','.join(request.access_route)),
-            ('method', request.method),
-            ('path', full_path),
-            ('status', get_prop('canonical_response_status', 500)),
-            ('request_user_agent', request.headers.get('user-agent')),
-        ))
-
-        request_id = request.headers.get('x-request-id')
-        if request_id:
-            params['request_id'] = request_id
+        params = get_default_params()
 
         timing_database = get_prop('canonical_timing_database')
         if timing_database:
@@ -101,6 +86,28 @@ class Events(object):
 
         for outlet in self.outlets:
             outlet.handle(params, measures, samples)
+
+
+def get_default_params():
+    # Don't use request.full_path since it fails to decode invalid utf-8
+    # paths (as of werkzeug 0.15)
+    full_path = request.path
+    if request.args:
+        full_path += '?' + request.query_string.decode('utf-8', ERROR_HANDLER)
+
+    params = OrderedDict((
+        ('fwd', ','.join(request.access_route)),
+        ('method', request.method),
+        ('path', full_path),
+        ('status', get_prop('canonical_response_status', 500)),
+        ('request_user_agent', request.headers.get('user-agent')),
+    ))
+
+    request_id = request.headers.get('x-request-id')
+    if request_id:
+        params['request_id'] = request_id
+
+    return params
 
 
 def _before_request():
@@ -143,12 +150,14 @@ if HAS_SQLALCHEMY:
     @event.listens_for(Engine, "before_cursor_execute")
     def before_cursor_execute(conn, cursor, statement,
                             parameters, context, executemany):
+        # pylint: disable=unused-argument,too-many-arguments
         conn.info.setdefault('query_start_time', []).append(time.time())
 
 
     @event.listens_for(Engine, "after_cursor_execute")
     def after_cursor_execute(conn, cursor, statement,
                             parameters, context, executemany):
+        # pylint: disable=unused-argument,too-many-arguments,too-many-locals
         total = time.time() - conn.info['query_start_time'].pop(-1)
         timing_database = get_prop('canonical_timing_database', 0)
         store_prop('canonical_timing_database', timing_database + total)

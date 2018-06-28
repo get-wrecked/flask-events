@@ -18,8 +18,9 @@ class LogfmtOutlet(object):
         for key, val in samples.items():
             event_data['sample#%s' % key] = val
 
-        log_line_items = (format_key_value_pair(key, val) for (key, val) in event_data.items())
-        self.logger.info(' '.join(log_line_items))
+        self.logger.info(' '.join(
+            format_key_value_pair(key, val) for (key, val) in event_data.items())
+        )
 
 
 def format_key_value_pair(key, value):

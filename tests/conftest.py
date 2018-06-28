@@ -47,7 +47,7 @@ def create_app():
         return 'Hello, world'
 
     @_app.route('/abort')
-    def crash():
+    def crash(): # pylint: disable=unused-variable
         raise abort(503)
 
     return _app
