@@ -21,7 +21,7 @@ except ImportError:
 NEEDS_QUOTES_RE = re.compile(r'[\s=]')
 
 
-class CanonicalLogger(object):
+class Events(object):
     '''
     Helper class to log canonical log lines for each request.
     '''

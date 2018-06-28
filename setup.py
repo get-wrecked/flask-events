@@ -7,11 +7,11 @@ from setuptools import setup, find_packages
 
 
 setup(
-    name='Flask-Canonical',
-    version='0.1.2',
+    name='Flask-Events',
+    version='0.1.0',
     author='Tarjei Husøy',
     author_email='git@thusoy.com',
-    url='https://github.com/megacool/flask-canonical',
+    url='https://github.com/megacool/flask-events',
     description="Easy canonical logging for Flask",
     packages=find_packages(),
     classifiers=[

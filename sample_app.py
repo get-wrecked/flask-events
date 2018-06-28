@@ -5,7 +5,7 @@ import os
 import base64
 
 from flask import Flask, jsonify, redirect, abort, request
-from flask_canonical import CanonicalLogger
+from flask_events import Events
 from flask_sqlalchemy import SQLAlchemy
 
 logging.config.dictConfig({
@@ -30,7 +30,7 @@ logging.config.dictConfig({
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-canonical_logger = CanonicalLogger(app)
+events = Events(app)
 db = SQLAlchemy(app)
 
 class Item(db.Model):
@@ -47,14 +47,14 @@ class Item(db.Model):
 @app.route('/')
 def main():
     items = Item.query.all()
-    canonical_logger.add_sample('item.count', len(items))
+    events.add_sample('item.count', len(items))
     return jsonify([item.to_json() for item in items])
 
 
 @app.route('/add-random', methods=['POST'])
 def add_random():
     random_name = base64.urlsafe_b64encode(os.urandom(6)).decode('utf-8')
-    canonical_logger.add('name', random_name)
+    events.add('name', random_name)
     db.session.add(Item(name=random_name))
     db.session.commit()
     return redirect('/')

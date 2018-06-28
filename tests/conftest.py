@@ -3,23 +3,23 @@ import warnings
 import pytest
 from flask import Flask, abort
 
-from flask_canonical import CanonicalLogger
+from flask_events import Events
 
 
 # Ensure warnings are treated as errors when running tests
-warnings.filterwarnings('error', module='flask_canonical')
+warnings.filterwarnings('error', module='flask_events')
 
 
 def app_init_direct():
     _app = create_app()
-    _app.canonical_logger = CanonicalLogger(_app)
+    _app.events = Events(_app)
     return _app
 
 
 def app_factory():
     _app = create_app()
-    _app.canonical_logger = CanonicalLogger()
-    _app.canonical_logger.init_app(_app)
+    _app.events = Events()
+    _app.events.init_app(_app)
     return _app
 
 

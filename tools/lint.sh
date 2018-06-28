@@ -3,5 +3,5 @@
 set -e
 
 ./venv/bin/pylint --rcfile .pylintrc \
-    flask_canonical \
+    flask_events \
     tests/*.py

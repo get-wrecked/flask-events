@@ -8,4 +8,4 @@ $TEST_COMMAND
     --patterns="*.py" \
     --recursive \
     --command "$TEST_COMMAND" \
-    tests/ flask_canonical/ tools/
+    tests/ flask_events/ tools/

@@ -23,7 +23,7 @@ def test_custom_tag(app):
     with LogCapture() as logs:
         with app.test_request_context('/'):
             app.preprocess_request()
-            app.canonical_logger.tag = 'mytag'
+            app.events.tag = 'mytag'
 
     assert_logged(logs, 'tag', 'mytag')
 
@@ -42,7 +42,7 @@ def test_add_custom_value(app):
     with LogCapture() as logs:
         with app.test_request_context('/'):
             app.preprocess_request()
-            app.canonical_logger.add('mykey', 'my-custom-value')
+            app.events.add('mykey', 'my-custom-value')
 
     assert_logged(logs, 'mykey', 'my-custom-value')
 
@@ -51,7 +51,7 @@ def test_add_custom_value_with_spaces(app):
     with LogCapture() as logs:
         with app.test_request_context('/'):
             app.preprocess_request()
-            app.canonical_logger.add('mykey', 'my custom value')
+            app.events.add('mykey', 'my custom value')
 
     assert_logged(logs, 'mykey', 'my custom value')
     assert 'mykey="my custom value"' in logs.records[-1].msg
@@ -61,7 +61,7 @@ def test_add_sample(app):
     with LogCapture() as logs:
         with app.test_request_context('/'):
             app.preprocess_request()
-            app.canonical_logger.add_sample('counter', 3)
+            app.events.add_sample('counter', 3)
 
     assert_logged(logs, 'sample#counter', '3')
 
