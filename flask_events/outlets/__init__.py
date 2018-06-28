@@ -1,0 +1,1 @@
+from .logfmt import LogfmtOutlet

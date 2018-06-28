@@ -4,9 +4,10 @@ import re
 import sys
 import time
 from collections import OrderedDict
-from logging import getLogger
 
 from flask import request, _app_ctx_stack as stack
+
+from .outlets import LogfmtOutlet
 
 HAS_SQLALCHEMY = False
 try:
@@ -51,7 +52,7 @@ class Events(object):
         app.after_request(_after_request)
         app.teardown_request(self._teardown_request)
 
-        self.logger = getLogger('%s.canonical' % app.name)
+        self.outlets = [LogfmtOutlet(app)]
 
 
     def add(self, key, value): # pylint: disable=no-self-use
@@ -99,7 +100,8 @@ class Events(object):
             params['error_msg'] = str(exception)
 
         log_line_items = (format_key_value_pair(key, val) for (key, val) in params.items())
-        self.logger.info(' '.join(log_line_items))
+        for outlet in self.outlets:
+            outlet.handle(log_line_items)
 
 
 def _before_request():
