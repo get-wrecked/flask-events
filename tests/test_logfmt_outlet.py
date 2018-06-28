@@ -6,6 +6,8 @@ from testfixtures import LogCapture
 
 from flask_events.outlets.logfmt import LogfmtOutlet
 
+# pylint: disable=redefined-outer-name
+
 
 def test_logfmt(outlet):
     event_data = OrderedDict((('key', 'value'), ('foo', 'bar')))
@@ -19,11 +21,16 @@ def test_logfmt(outlet):
     assert record.levelname == 'INFO'
 
 
-def test_add_custom_value_with_spaces(outlet):
+@pytest.mark.parametrize('event_data,expected_output', [
+    ({'somekey': 1}, 'somekey=1'),
+    ({'empty': None}, 'empty='),
+    ({'mykey': 'my custom value'}, 'mykey="my custom value"'),
+])
+def test_logfmt_formatting(event_data, expected_output, outlet):
     with LogCapture() as logs:
-        outlet.handle({'mykey': 'my custom value'}, {}, {})
+        outlet.handle(event_data, {}, {})
 
-    assert logs.records[0].msg == 'mykey="my custom value"'
+    assert logs.records[0].msg == expected_output
 
 
 @pytest.fixture
