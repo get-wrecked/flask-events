@@ -13,6 +13,9 @@ setup(
     author_email='git@thusoy.com',
     url='https://github.com/megacool/flask-events',
     description="Easy canonical logging for Flask",
+    install_requires=[
+        'libhoney >= 1.3.0',
+    ],
     packages=find_packages(),
     classifiers=[
         # 'Development Status :: 1 - Planning',
