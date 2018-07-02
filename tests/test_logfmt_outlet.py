@@ -33,6 +33,18 @@ def test_logfmt_formatting(event_data, expected_output, outlet):
     assert logs.records[0].msg == expected_output
 
 
+def test_logfmt_measurements(outlet):
+    with LogCapture() as logs:
+        outlet.handle({}, {'measurement': 0.123456}, {})
+    assert logs.records[0].msg == 'measure#measurement=0.123s'
+
+
+def test_logfmt_samples(outlet):
+    with LogCapture() as logs:
+        outlet.handle({}, {}, {'sample': 'foo'})
+    assert logs.records[0].msg == 'sample#sample=foo'
+
+
 @pytest.fixture
 def outlet():
     return LogfmtOutlet('test_app')
