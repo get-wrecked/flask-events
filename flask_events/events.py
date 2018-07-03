@@ -50,6 +50,7 @@ class Events(object):
         app.before_request(_before_request)
         app.after_request(_after_request)
         app.teardown_request(self._teardown_request)
+        app.teardown_appcontext(self._teardown_appcontext)
 
         self.outlets = [LogfmtOutlet(app.name)]
 
@@ -62,12 +63,23 @@ class Events(object):
 
     def _teardown_request(self, exception):
         params = get_default_params()
+        for key, val in params.items():
+            self.add(key, val)
 
-        timing_database = get_prop('canonical_timing_database')
-        if timing_database is not None:
-            self.add('database_total', timing_database, unit='seconds')
 
-        self.add('request_total', time.time() - get_prop('canonical_start_time'), unit='seconds')
+    def _teardown_appcontext(self, exception):
+        database_timings = get_prop('canonical_database_timings')
+        if database_timings is not None:
+            self.add('database_total', sum(database_timings), unit='seconds')
+
+        canonical_start_time = get_prop('canonical_start_time')
+        if canonical_start_time is None:
+            # App context was pushed and popped without a request context, ignore
+            return
+
+        self.add('request_total', time.time() - canonical_start_time, unit='seconds')
+
+        params = {}
 
         for key, value in get_prop('canonical_log_extra', ()):
             params[key] = value
