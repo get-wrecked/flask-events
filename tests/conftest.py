@@ -12,14 +12,10 @@ warnings.filterwarnings('error', module='flask_events')
 class TestOutlet(object):
     def __init__(self):
         self.event_data = None
-        self.measures = None
-        self.samples = None
 
 
-    def handle(self, event_data, measures, samples):
+    def handle(self, event_data):
         self.event_data = event_data
-        self.measures = measures
-        self.samples = samples
 
 
 def app_init_direct():

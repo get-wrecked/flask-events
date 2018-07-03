@@ -6,6 +6,7 @@ from collections import OrderedDict
 
 from flask import request, _app_ctx_stack as stack
 
+from . import UnitedMetric
 from .outlets import LogfmtOutlet
 
 HAS_SQLALCHEMY = False
@@ -53,16 +54,10 @@ class Events(object):
         self.outlets = [LogfmtOutlet(app.name)]
 
 
-    def add(self, key, value): # pylint: disable=no-self-use
+    def add(self, key, value, unit=None): # pylint: disable=no-self-use
+        if unit is not None:
+            value = UnitedMetric(value, unit)
         add_extra(key, value)
-
-
-    def add_measure(self, key, value): # pylint: disable=no-self-use
-        get_context().setdefault('canonical_log_measures', OrderedDict())[key] = value
-
-
-    def add_sample(self, key, value): # pylint: disable=no-self-use
-        get_context().setdefault('canonical_log_samples', OrderedDict())[key] = value
 
 
     def _teardown_request(self, exception):
@@ -70,22 +65,19 @@ class Events(object):
 
         timing_database = get_prop('canonical_timing_database')
         if timing_database:
-            self.add_measure('timing_database', timing_database)
+            self.add('timing_database', timing_database, unit='seconds')
 
-        self.add_measure('timing_total', time.time() - get_prop('canonical_start_time'))
+        self.add('timing_total', time.time() - get_prop('canonical_start_time'), unit='seconds')
 
         for key, value in get_prop('canonical_log_extra', ()):
             params[key] = value
-
-        measures = get_prop('canonical_log_measures', {})
-        samples = get_prop('canonical_log_samples', {})
 
         if exception:
             params['error'] = exception.__class__.__name__
             params['error_msg'] = str(exception)
 
         for outlet in self.outlets:
-            outlet.handle(params, measures, samples)
+            outlet.handle(params)
 
 
 def get_default_params():

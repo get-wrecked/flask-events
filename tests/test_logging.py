@@ -1,3 +1,6 @@
+from flask_events import UnitedMetric
+
+
 def test_logger_unconfigured(client):
     response = client.get('/')
     assert response.status_code == 200
@@ -7,7 +10,7 @@ def test_logger_unconfigured(client):
     assert test_outlet.event_data['method'] == 'GET'
     assert test_outlet.event_data['request_user_agent'].startswith('werkzeug')
     assert test_outlet.event_data['status'] == 200
-    assert 0 < test_outlet.measures['timing_total'] < 0.100
+    assert 0 < test_outlet.event_data['request_total'].value < 0.100
 
 
 def test_add(app):
@@ -18,6 +21,14 @@ def test_add(app):
     assert app.test_outlet.event_data['key'] == 'value'
 
 
+def test_add_with_unit(app):
+    with app.test_request_context('/'):
+        app.preprocess_request()
+        app.events.add('time', 1.23, unit='seconds')
+
+    assert app.test_outlet.event_data['time'] == UnitedMetric(1.23, 'seconds')
+
+
 def test_includes_request_id(client):
     response = client.get('/', headers={
         'x-request-id': 'myrequestid',
@@ -25,14 +36,6 @@ def test_includes_request_id(client):
     assert response.status_code == 200
 
     assert client.application.test_outlet.event_data['request_id'] == 'myrequestid'
-
-
-def test_add_sample(app):
-    with app.test_request_context('/'):
-        app.preprocess_request()
-        app.events.add_sample('counter', 3)
-
-    assert app.test_outlet.samples['counter'] == 3
 
 
 def test_aborted_view(client):
