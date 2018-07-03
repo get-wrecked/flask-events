@@ -65,9 +65,9 @@ class Events(object):
 
         timing_database = get_prop('canonical_timing_database')
         if timing_database:
-            self.add('timing_database', timing_database, unit='seconds')
+            self.add('database_total', timing_database, unit='seconds')
 
-        self.add('timing_total', time.time() - get_prop('canonical_start_time'), unit='seconds')
+        self.add('request_total', time.time() - get_prop('canonical_start_time'), unit='seconds')
 
         for key, value in get_prop('canonical_log_extra', ()):
             params[key] = value
