@@ -2,6 +2,7 @@ import re
 from logging import getLogger
 
 from ..events import UnitedMetric
+from ..utils import humanize_size
 
 
 NEEDS_QUOTES_RE = re.compile(r'[\s=]')
@@ -18,6 +19,8 @@ class LogfmtOutlet(object):
             if isinstance(val, UnitedMetric):
                 if val.unit == 'seconds':
                     event_data[key] = '%.3fs' % val.value
+                elif val.unit == 'bytes':
+                    event_data[key] = humanize_size(val.value)
                 else:
                     event_data[key] = '%s%s' % (val.value, val.unit)
 

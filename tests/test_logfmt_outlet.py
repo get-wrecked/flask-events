@@ -39,6 +39,12 @@ def test_logfmt_unit_seconds(outlet):
     assert logs.records[0].msg == 'measurement=0.123s'
 
 
+def test_logfmt_unit_bytes(outlet):
+    with LogCapture() as logs:
+        outlet.handle({'size': UnitedMetric(123456, 'bytes')})
+    assert logs.records[0].msg == 'size=120.6kB'
+
+
 def test_logfmt_unit_unknown_unit(outlet):
     with LogCapture() as logs:
         outlet.handle({'thing': UnitedMetric(3, 'foobars')})
