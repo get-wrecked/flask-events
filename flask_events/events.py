@@ -64,7 +64,7 @@ class Events(object):
         params = get_default_params()
 
         timing_database = get_prop('canonical_timing_database')
-        if timing_database:
+        if timing_database is not None:
             self.add('database_total', timing_database, unit='seconds')
 
         self.add('request_total', time.time() - get_prop('canonical_start_time'), unit='seconds')
