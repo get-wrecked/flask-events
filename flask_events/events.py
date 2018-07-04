@@ -156,13 +156,12 @@ if HAS_SQLALCHEMY:
     def before_cursor_execute(conn, cursor, statement,
                             parameters, context, executemany):
         # pylint: disable=unused-argument,too-many-arguments
-        conn.info.setdefault('query_start_time', []).append(time.time())
+        conn.info.setdefault('flask_events_query_start_time', []).append(time.time())
 
 
     @event.listens_for(Engine, "after_cursor_execute")
     def after_cursor_execute(conn, cursor, statement,
                             parameters, context, executemany):
         # pylint: disable=unused-argument,too-many-arguments,too-many-locals
-        total = time.time() - conn.info['query_start_time'].pop(-1)
-        timing_database = get_prop('canonical_timing_database', 0)
-        store_prop('canonical_timing_database', timing_database + total)
+        total = time.time() - conn.info['flask_events_query_start_time'].pop(-1)
+        get_context().setdefault('canonical_database_timings', []).append(total)
