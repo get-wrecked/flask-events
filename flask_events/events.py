@@ -71,6 +71,7 @@ class Events(object):
         database_timings = get_prop('canonical_database_timings')
         if database_timings is not None:
             self.add('database_total', sum(database_timings), unit='seconds')
+            self.add('database_roundtrips', len(database_timings))
 
         canonical_start_time = get_prop('canonical_start_time')
         if canonical_start_time is None:
