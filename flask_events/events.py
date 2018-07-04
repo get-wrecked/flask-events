@@ -138,7 +138,7 @@ def get_prop(key, default=None):
 def get_context():
     app_context = stack.top
 
-    if not app_context:
+    if app_context is None:
         return {}
 
     _context = getattr(app_context, 'canonical', None)
