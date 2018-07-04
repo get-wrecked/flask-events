@@ -141,10 +141,10 @@ def get_context():
     if app_context is None:
         return {}
 
-    _context = getattr(app_context, 'canonical', None)
-    if not _context:
+    _context = getattr(app_context, 'flask-events', None)
+    if _context is None:
         _context = {}
-        setattr(app_context, 'canonical', _context)
+        setattr(app_context, 'flask-events', _context)
 
     return _context
 
