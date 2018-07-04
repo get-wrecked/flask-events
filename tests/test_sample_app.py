@@ -23,6 +23,7 @@ def test_sample_app_add_random(sample_app_client):
     assert response.status_code == 302
     assert 'method=POST path=/add-random status=302' in logs.records[0].msg
 
+    assert 'database_roundtrips=3' in logs.records[0].msg
     assert_matches(r'database_total=0.00\ds', logs.records[0].msg)
 
 
