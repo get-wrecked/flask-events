@@ -70,8 +70,8 @@ class Events(object):
     def _teardown_appcontext(self, exception):
         database_timings = get_prop('canonical_database_timings')
         if database_timings is not None:
-            self.add('database_total', sum(database_timings), unit='seconds')
-            self.add('database_roundtrips', len(database_timings))
+            self.add('database_query_time', sum(database_timings), unit='seconds')
+            self.add('database_executes', len(database_timings))
 
         canonical_start_time = get_prop('canonical_start_time')
         if canonical_start_time is None:
@@ -151,7 +151,11 @@ def get_context():
 
 
 if HAS_SQLALCHEMY:
-    # Register as event handler on the database to track time spent
+    # Tracking something more accurate like actual roundtrip count is much more
+    # complex since sqlalchemy doesn't give before/after signals on
+    # commit/rollback, thus ignore that for now
+
+    # Register as event handler on the database to track time spent on queries
     @event.listens_for(Engine, "before_cursor_execute")
     def receive_before_cursor_execute(conn, cursor, statement,
                             parameters, context, executemany):

@@ -13,7 +13,7 @@ def test_sample_app(sample_app_client):
     assert response.status_code == 200
     assert len(logs.records) == 1
     assert 'method=GET path=/ status=200' in logs.records[0].msg
-    assert 'database_total=' in logs.records[0].msg
+    assert 'database_query_time=' in logs.records[0].msg
 
 
 def test_sample_app_add_random(sample_app_client):
@@ -23,8 +23,8 @@ def test_sample_app_add_random(sample_app_client):
     assert response.status_code == 302
     assert 'method=POST path=/add-random status=302' in logs.records[0].msg
 
-    assert 'database_roundtrips=3' in logs.records[0].msg
-    assert_matches(r'database_total=0.00\ds', logs.records[0].msg)
+    assert 'database_executes=1' in logs.records[0].msg
+    assert_matches(r'database_query_time=0.00\ds', logs.records[0].msg)
 
 
 def test_sample_app_abort(sample_app_client):
@@ -33,7 +33,7 @@ def test_sample_app_abort(sample_app_client):
 
     assert response.status_code == 503
     assert 'path=/abort status=503' in logs.records[0].msg
-    assert 'database_total=' not in logs.records[0].msg
+    assert 'database_query_time=' not in logs.records[0].msg
 
 
 def test_sample_app_crash(sample_app_client):
