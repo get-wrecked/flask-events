@@ -2,6 +2,7 @@ import binascii
 import codecs
 import sys
 import time
+import warnings
 from collections import OrderedDict
 
 from flask import request, _app_ctx_stack as stack
@@ -79,6 +80,14 @@ class Events(object):
             return
 
         self.add('request_total', time.time() - canonical_start_time, unit='seconds')
+
+        currently_in_database_session = get_prop('flask_events_in_database_session')
+        if currently_in_database_session:
+            warnings.warn(
+                'flask-events seems to have been initialized after flask-sqlalchemy, '
+                'move the app initialization for flask-events earlier to ensure the '
+                'database roundtrip count is correct.'
+            )
 
         params = {}
 
@@ -165,3 +174,24 @@ if HAS_SQLALCHEMY:
         # pylint: disable=unused-argument,too-many-arguments,too-many-locals
         total = time.time() - conn.info['flask_events_query_start_time'].pop(-1)
         get_context().setdefault('canonical_database_timings', []).append(total)
+
+
+    @event.listens_for(Engine, 'begin')
+    def receive_begin(conn):
+        # pylint: disable=unused-argument
+        get_context()['flask_events_in_database_session'] = True
+        get_context().setdefault('canonical_database_timings', []).append(0)
+
+
+    @event.listens_for(Engine, 'commit')
+    def receive_commit(conn):
+        # pylint: disable=unused-argument
+        get_context()['flask_events_in_database_session'] = False
+        get_context().setdefault('canonical_database_timings', []).append(0)
+
+
+    @event.listens_for(Engine, 'rollback')
+    def receive_rollback(conn):
+        # pylint: disable=unused-argument
+        get_context()['flask_events_in_database_session'] = False
+        get_context().setdefault('canonical_database_timings', []).append(0)
