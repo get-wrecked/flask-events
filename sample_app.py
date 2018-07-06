@@ -6,7 +6,8 @@ import base64
 
 from flask import Flask, jsonify, redirect, abort, request, Blueprint
 from flask_events import Events
-from flask_sqlalchemy import SQLAlchemy
+from flask_events.dbapi_connection import MetricSQLAlchemy
+# from flask_sqlalchemy import SQLAlchemy
 
 logging.config.dictConfig({
     'version': 1,
@@ -28,7 +29,7 @@ logging.config.dictConfig({
 })
 
 mod = Blueprint('main', __name__)
-db = SQLAlchemy()
+db = MetricSQLAlchemy()
 events = Events()
 
 
