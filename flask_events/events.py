@@ -162,14 +162,14 @@ def get_context():
 if HAS_SQLALCHEMY:
     # Register as event handler on the database to track time spent
     @event.listens_for(Engine, "before_cursor_execute")
-    def before_cursor_execute(conn, cursor, statement,
+    def receive_before_cursor_execute(conn, cursor, statement,
                             parameters, context, executemany):
         # pylint: disable=unused-argument,too-many-arguments
         conn.info.setdefault('flask_events_query_start_time', []).append(time.time())
 
 
     @event.listens_for(Engine, "after_cursor_execute")
-    def after_cursor_execute(conn, cursor, statement,
+    def receive_after_cursor_execute(conn, cursor, statement,
                             parameters, context, executemany):
         # pylint: disable=unused-argument,too-many-arguments,too-many-locals
         total = time.time() - conn.info['flask_events_query_start_time'].pop(-1)
