@@ -29,7 +29,7 @@ events = Events(app)
 
 @app.route('/')
 def main():
-    events.sample('key', 'value')
+    events.add('key', 'value')
     return 'Hello, world!'
 ```
 
@@ -37,9 +37,11 @@ It logs to a logger called `<app-name>.canonical`, configure your logging to for
 
     fwd=127.0.0.1 tag=main method=GET path=/ status=200 request_user_agent=curl/7.38.0 key=value measure#timing_total=0.001s
 
-Timing data is logged in a format similar to [l2met](https://github.com/ryandotsmith/l2met), `measure#db.total=0.002s`. If you're using SQLAlchemy timing from the database is tracked automatically.
+To also include a Honeycomb outlet, set `EVENTS_HONEYCOMB_KEY` in the app config. It will by default write to a dataset named after the app, or you can set a custom dataset name by setting `EVENTS_HONEYCOMB_DATASET`.
 
-There is a sample app in `sample_app.py` you can inspect and fire up if you want to play around with the logger.
+If you're using SQLAlchemy query timing from the database is tracked automatically.
+
+There is a sample app in `sample_app.py` you can inspect and fire up if you want to play around and learn how it works.
 
 
 Development
