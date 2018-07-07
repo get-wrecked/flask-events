@@ -15,17 +15,20 @@ class LogfmtOutlet(object):
 
 
     def handle(self, event_data):
+        formatted_data = {}
         for key, val in event_data.items():
             if isinstance(val, UnitedMetric):
                 if val.unit == 'seconds':
-                    event_data[key] = '%.3fs' % val.value
+                    formatted_data[key] = '%.3fs' % val.value
                 elif val.unit == 'bytes':
-                    event_data[key] = humanize_size(val.value)
+                    formatted_data[key] = humanize_size(val.value)
                 else:
-                    event_data[key] = '%s%s' % (val.value, val.unit)
+                    formatted_data[key] = '%s%s' % (val.value, val.unit)
+            else:
+                formatted_data[key] = val
 
         self.logger.info(' '.join(
-            format_key_value_pair(key, val) for (key, val) in event_data.items())
+            format_key_value_pair(key, val) for (key, val) in formatted_data.items())
         )
 
 
