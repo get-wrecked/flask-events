@@ -6,9 +6,15 @@ import re
 from setuptools import setup, find_packages
 
 
+version_file = os.path.join(os.path.dirname(__file__), 'flask_events', '_version.py')
+with open(version_file) as fh:
+    version_file_contents = fh.read().strip()
+    version_match = re.match(r"__version__ = '(\d\.\d\.\d.*)'", version_file_contents)
+    version = version_match.group(1)
+
 setup(
     name='Flask-Events',
-    version='0.1.0',
+    version=version,
     author='Tarjei Husøy',
     author_email='git@thusoy.com',
     url='https://github.com/megacool/flask-events',
