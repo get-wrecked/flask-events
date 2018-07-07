@@ -4,10 +4,11 @@ import sys
 import time
 from collections import OrderedDict
 
+import libhoney
 from flask import request, _app_ctx_stack as stack
 
 from . import UnitedMetric
-from .outlets import LogfmtOutlet
+from .outlets import LogfmtOutlet, LibhoneyOutlet
 
 HAS_SQLALCHEMY = False
 try:
@@ -53,6 +54,15 @@ class Events(object):
         app.teardown_appcontext(self._teardown_appcontext)
 
         self.outlets = [LogfmtOutlet(app.name)]
+
+        libhoney_key = app.config.get('EVENTS_HONEYCOMB_KEY')
+        libhoney_dataset = app.config.get('EVENTS_HONEYCOMB_DATASET', app.name)
+        if libhoney_key:
+            libhoney_client = libhoney.Client(
+                writekey=libhoney_key,
+                dataset=libhoney_dataset,
+            )
+            self.outlets.append(LibhoneyOutlet(libhoney_client))
 
 
     def add(self, key, value, unit=None): # pylint: disable=no-self-use

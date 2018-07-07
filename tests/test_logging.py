@@ -1,4 +1,6 @@
-from flask_events import UnitedMetric
+from flask import Flask
+
+from flask_events import Events, UnitedMetric
 
 
 def test_logger_unconfigured(client):
@@ -50,3 +52,15 @@ def test_invalid_utf8(client):
     assert response.status_code == 200
 
     assert client.application.test_outlet.event_data['path'] == '/?param=\\xea'
+
+
+def test_honeycomb_init():
+    app = Flask('test_app')
+    app.config['EVENTS_HONEYCOMB_KEY'] = 'foobar'
+
+    events = Events()
+    events.init_app(app)
+
+    assert len(events.outlets) == 2
+    assert events.outlets[1].libhoney_client.writekey == 'foobar'
+    assert events.outlets[1].libhoney_client.dataset == 'test_app'
