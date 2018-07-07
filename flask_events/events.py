@@ -8,6 +8,7 @@ import libhoney
 from flask import request, _app_ctx_stack as stack
 
 from . import UnitedMetric
+from ._version import __version__
 from .outlets import LogfmtOutlet, LibhoneyOutlet
 
 HAS_SQLALCHEMY = False
@@ -61,6 +62,7 @@ class Events(object):
             libhoney_client = libhoney.Client(
                 writekey=libhoney_key,
                 dataset=libhoney_dataset,
+                user_agent_addition='flask-events/%s' % __version__,
             )
             self.outlets.append(LibhoneyOutlet(libhoney_client))
 
