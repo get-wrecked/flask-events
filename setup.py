@@ -18,7 +18,7 @@ setup(
     author='Tarjei Husøy',
     author_email='git@thusoy.com',
     url='https://github.com/megacool/flask-events',
-    description="Easy canonical logging for Flask",
+    description="Easy structured logging and metrics collection for Flask",
     install_requires=[
         'libhoney >= 1.3.0',
     ],
