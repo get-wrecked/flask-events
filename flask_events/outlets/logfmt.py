@@ -1,4 +1,5 @@
 import re
+from collections import OrderedDict
 from logging import getLogger
 
 from ..events import UnitedMetric
@@ -15,7 +16,7 @@ class LogfmtOutlet(object):
 
 
     def handle(self, event_data):
-        formatted_data = {}
+        formatted_data = OrderedDict()
         for key, val in event_data.items():
             if isinstance(val, UnitedMetric):
                 if val.unit == 'seconds':

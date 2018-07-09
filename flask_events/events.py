@@ -92,10 +92,7 @@ class Events(object):
 
         self.add('request_total', time.time() - canonical_start_time, unit='seconds')
 
-        params = {}
-
-        for key, value in get_prop('canonical_log_extra', ()):
-            params[key] = value
+        params = get_prop('canonical_log_extra', OrderedDict())
 
         if exception:
             params['error'] = exception.__class__.__name__
@@ -137,7 +134,7 @@ def _after_request(response):
 
 
 def add_extra(key, value):
-    get_context().setdefault('canonical_log_extra', []).append((key, value))
+    get_context().setdefault('canonical_log_extra', OrderedDict())[key] = value
 
 
 def store_prop(key, value):
