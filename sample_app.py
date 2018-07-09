@@ -4,8 +4,8 @@ import logging.config
 import os
 import base64
 
-from flask import Flask, jsonify, redirect, abort, request
-from flask_canonical import CanonicalLogger
+from flask import Flask, jsonify, redirect, abort, request, Blueprint
+from flask_events import Events
 from flask_sqlalchemy import SQLAlchemy
 
 logging.config.dictConfig({
@@ -27,11 +27,23 @@ logging.config.dictConfig({
     },
 })
 
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-canonical_logger = CanonicalLogger(app)
-db = SQLAlchemy(app)
+mod = Blueprint('main', __name__)
+db = SQLAlchemy()
+events = Events()
+
+
+def create_app():
+    app = Flask(__name__)
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+    db.init_app(app)
+    events.init_app(app)
+
+    app.register_blueprint(mod)
+
+    return app
+
 
 class Item(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -44,34 +56,41 @@ class Item(db.Model):
         }
 
 
-@app.route('/')
+@mod.route('/')
 def main():
     items = Item.query.all()
-    canonical_logger.add_sample('item.count', len(items))
+    events.add('item.count', len(items))
     return jsonify([item.to_json() for item in items])
 
 
-@app.route('/add-random', methods=['POST'])
+@mod.route('/add-random', methods=['POST'])
 def add_random():
     random_name = base64.urlsafe_b64encode(os.urandom(6)).decode('utf-8')
-    canonical_logger.add('name', random_name)
+    events.add('name', random_name)
     db.session.add(Item(name=random_name))
     db.session.commit()
     return redirect('/')
 
 
-@app.route('/abort')
+@mod.route('/abort')
 def abort_503():
     abort(503)
 
 
-@app.route('/crash')
+@mod.route('/crash')
 def crash():
     message = request.args.get('message', 'no message')
     raise ValueError(message)
 
 
-if __name__ == '__main__':
-    db.create_all()
+def cli_main():
+    app = create_app()
+    with app.app_context():
+        db.create_all()
+
     print('* Listening on 127.0.0.1:5000')
     app.run(use_reloader=True)
+
+
+if __name__ == '__main__':
+    cli_main()
