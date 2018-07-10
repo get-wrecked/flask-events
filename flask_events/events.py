@@ -35,7 +35,7 @@ else:
 
 class Events(object):
     '''
-    Helper class to log canonical log lines for each request.
+    Helper class to generate structured log data for each request.
     '''
     # A couple of the methods here don't use self since the state during the
     # request is stored on the application context for thread safety, but are
