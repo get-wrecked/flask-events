@@ -1,3 +1,5 @@
+import socket
+
 import pytest
 from unittest import mock
 
@@ -12,6 +14,7 @@ def test_libhoney():
 
     client_mock.send_now.assert_called_with({
         'key': 'value',
+        'hostname': socket.getfqdn(),
     })
 
 
@@ -23,5 +26,9 @@ def test_libhoney_units(test_input, expected_output):
     client_mock = mock.Mock()
     outlet = LibhoneyOutlet(client_mock)
     outlet.handle(test_input)
+
+    expected_output.update({
+        'hostname': socket.getfqdn(),
+    })
 
     client_mock.send_now.assert_called_with(expected_output)
