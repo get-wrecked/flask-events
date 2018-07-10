@@ -47,8 +47,6 @@ class Events(object):
 
 
     def init_app(self, app):
-        self.app = app
-
         app.before_request(_before_request)
         app.after_request(_after_request)
         app.teardown_request(self._teardown_request)
