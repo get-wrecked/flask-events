@@ -45,12 +45,12 @@ patch_changelog() {
 
 bump_version() {
     sed "s/__version__ = '.*'/__version__ = '$version'/" flask_events/_version.py \
-        > tmp-setup
-    mv tmp-setup setup.py
+        > tmp-version
+    mv tmp-version flask_events/_version.py
 }
 
 git_commit_and_tag() {
-    git add CHANGELOG.md setup.py
+    git add CHANGELOG.md flask_events/_version.py
     git commit -m "Release $version"
     git tag -m "Release $version" "v$version"
 }
