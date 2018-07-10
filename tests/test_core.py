@@ -31,6 +31,14 @@ def test_add_with_unit(app):
     assert app.test_outlet.event_data['time'] == UnitedMetric(1.23, 'seconds')
 
 
+def test_add_all(app):
+    app.events.add_all('version', 2)
+    with app.test_request_context('/'):
+        app.preprocess_request()
+
+    assert app.test_outlet.event_data['version'] == 2
+
+
 def test_includes_request_id(client):
     response = client.get('/', headers={
         'x-request-id': 'myrequestid',

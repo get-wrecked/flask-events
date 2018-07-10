@@ -45,6 +45,8 @@ class Events(object):
         if app is not None:
             self.init_app(app)
 
+        self.add_all_data = OrderedDict()
+
 
     def init_app(self, app):
         app.before_request(_before_request)
@@ -71,6 +73,12 @@ class Events(object):
         add_extra(key, value)
 
 
+    def add_all(self, key, value, unit=None):
+        if unit is not None:
+            value = UnitedMetric(value, unit)
+        self.add_all_data[key] = value
+
+
     def _teardown_request(self, exception):
         params = get_default_params()
         for key, val in params.items():
@@ -90,7 +98,11 @@ class Events(object):
 
         self.add('request_total', time.time() - canonical_start_time, unit='seconds')
 
-        params = get_prop('canonical_log_extra', OrderedDict())
+        params = self.add_all_data.copy()
+
+        request_extras = get_prop('canonical_log_extra')
+        if request_extras is not None:
+            params.update(request_extras)
 
         if exception:
             params['error'] = exception.__class__.__name__
