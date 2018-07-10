@@ -44,7 +44,7 @@ patch_changelog() {
 }
 
 bump_version() {
-    sed "s/version='.*',/version='$version',/" setup.py \
+    sed "s/__version__ = '.*'/__version__ = '$version'/" flask_events/_version.py \
         > tmp-setup
     mv tmp-setup setup.py
 }
