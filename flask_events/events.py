@@ -86,21 +86,20 @@ class Events(object):
 
 
     def _teardown_appcontext(self, exception):
-        database_timings = get_prop('canonical_database_timings')
+        database_timings = get_prop('database_timings')
         if database_timings is not None:
             self.add('database_query_time', sum(database_timings), unit='seconds')
             self.add('database_executes', len(database_timings))
 
-        canonical_start_time = get_prop('canonical_start_time')
-        if canonical_start_time is None:
+        request_start_time = get_prop('request_start_time')
+        if request_start_time is None:
             # App context was pushed and popped without a request context, ignore
             return
 
-        self.add('request_total', time.time() - canonical_start_time, unit='seconds')
+        self.add('request_total', time.time() - request_start_time, unit='seconds')
 
         params = self.add_all_data.copy()
-
-        request_extras = get_prop('canonical_log_extra')
+        request_extras = get_prop('request_extras')
         if request_extras is not None:
             params.update(request_extras)
 
@@ -123,7 +122,7 @@ def get_default_params():
         ('fwd', ','.join(request.access_route)),
         ('method', request.method),
         ('path', full_path),
-        ('status', get_prop('canonical_response_status', 500)),
+        ('status', get_prop('response_status', 500)),
         ('request_user_agent', request.headers.get('user-agent')),
     ))
 
@@ -135,16 +134,16 @@ def get_default_params():
 
 
 def _before_request():
-    store_prop('canonical_start_time', time.time())
+    store_prop('request_start_time', time.time())
 
 
 def _after_request(response):
-    store_prop('canonical_response_status', response.status_code)
+    store_prop('response_status', response.status_code)
     return response
 
 
 def add_extra(key, value):
-    get_context().setdefault('canonical_log_extra', OrderedDict())[key] = value
+    get_context().setdefault('request_extras', OrderedDict())[key] = value
 
 
 def store_prop(key, value):
@@ -187,4 +186,4 @@ if HAS_SQLALCHEMY:
                             parameters, context, executemany):
         # pylint: disable=unused-argument,too-many-arguments,too-many-locals
         total = time.time() - conn.info['flask_events_query_start_time'].pop(-1)
-        get_context().setdefault('canonical_database_timings', []).append(total)
+        get_context().setdefault('database_timings', []).append(total)
