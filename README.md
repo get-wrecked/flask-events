@@ -35,7 +35,7 @@ def main():
 
 It logs to a logger called `<app-name>.canonical`, configure your logging to forward this to syslog or a log file or stdout however you like:
 
-    fwd=127.0.0.1 tag=main method=GET path=/ status=200 request_user_agent=curl/7.38.0 key=value measure#timing_total=0.001s
+    key=value fwd=127.0.0.1 method=GET path=/ status=200 request_user_agent=curl/7.54.0 request_total=0.003s
 
 To also include a Honeycomb outlet, set `EVENTS_HONEYCOMB_KEY` in the app config. It will by default write to a dataset named after the app, or you can set a custom dataset name by setting `EVENTS_HONEYCOMB_DATASET`.
 
