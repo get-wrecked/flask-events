@@ -1,6 +1,11 @@
+import os
+from unittest import mock
+
 from flask import Flask
 
 from flask_events import Events, UnitedMetric
+
+from .conftest import app_factory
 
 
 def test_logger_unconfigured(client):
@@ -72,3 +77,16 @@ def test_honeycomb_init():
     assert len(events.outlets) == 2
     assert events.outlets[1].libhoney_client.writekey == 'foobar'
     assert events.outlets[1].libhoney_client.dataset == 'test_app'
+
+
+def test_default_heroku_env():
+    mock_env = {
+        'HEROKU_RELEASE_VERSION': 'v12',
+        'HEROKU_SLUG_COMMIT': '5ca1ab1e',
+    }
+    with mock.patch.dict(os.environ, mock_env):
+        app = app_factory()
+        with app.test_request_context('/'):
+            app.preprocess_request()
+        assert app.test_outlet.event_data['release_version'] == 'v12'
+        assert app.test_outlet.event_data['slug_commit'] == '5ca1ab1e'

@@ -61,6 +61,8 @@ Data included by default
 | error_msg | list index out of range | Only if the request fails with an uncaught exception. |
 | request_id | f100ded | If the X-Request-ID HTTP header was present. |
 | hostname | example.com | libhoney outlet only, since most logging setups automatically includes this. This is the host that handled the request. |
+| release_version | v34 | If running on Heroku and the `runtime-dyno-metadata` labs feature is enabled. This is the version of your app. |
+| slug_commit | 5ca1ab1e | If running on Heroku and the `runtime-dyno-metadata` labs feature is enabled, and the slug was built from a git commit. |
 
 
 Development

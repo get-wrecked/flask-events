@@ -1,5 +1,6 @@
 import binascii
 import codecs
+import os
 import sys
 import time
 from collections import OrderedDict
@@ -45,7 +46,7 @@ class Events(object):
         if app is not None:
             self.init_app(app)
 
-        self.add_all_data = OrderedDict()
+        self.add_all_data = get_default_all_data()
 
 
     def init_app(self, app):
@@ -109,6 +110,19 @@ class Events(object):
 
         for outlet in self.outlets:
             outlet.handle(params)
+
+
+def get_default_all_data():
+    all_data = OrderedDict()
+
+    heroku_release_version = os.environ.get('HEROKU_RELEASE_VERSION')
+    if heroku_release_version:
+        all_data['release_version'] = heroku_release_version
+    heroku_slug_commit = os.environ.get('HEROKU_SLUG_COMMIT')
+    if heroku_slug_commit:
+        all_data['slug_commit'] = heroku_slug_commit
+
+    return all_data
 
 
 def get_default_params():
