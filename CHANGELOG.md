@@ -1,6 +1,12 @@
 Changelog
 =========
 
+# UNRELEASED
+
+## Fixed
+- The logfmt outlet now formats 0 correctly (previously it would be empty string),0 and outputs
+  True/False in lowercase, and by default formats floats with four digits.
+
 # 0.2.0 - 2018-07-10
 
 ## Added
