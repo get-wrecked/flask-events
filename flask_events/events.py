@@ -6,7 +6,8 @@ import time
 from collections import OrderedDict
 
 import libhoney
-from flask import request, _app_ctx_stack as stack
+from flask import current_app, request, _app_ctx_stack as stack
+from werkzeug.routing import RequestRedirect, MethodNotAllowed, NotFound
 
 from . import UnitedMetric
 from ._version import __version__
@@ -140,11 +141,40 @@ def get_default_params():
         ('request_user_agent', request.headers.get('user-agent')),
     ))
 
+    view_function = get_view_function(current_app, request.path, request.method)
+    if view_function:
+        params['handler'] = '%s.%s' % (view_function.__module__, view_function.__qualname__)
+
     request_id = request.headers.get('x-request-id')
     if request_id:
         params['request_id'] = request_id
 
     return params
+
+
+def get_view_function(app, url, method):
+    """Match a url and return the view and arguments
+    it will be called with, or None if there is no view.
+    Creds: http://stackoverflow.com/a/38488506
+    """
+    # pylint: disable=too-many-return-statements
+
+    adapter = app.create_url_adapter(request)
+
+    try:
+        match = adapter.match(url, method=method)
+    except RequestRedirect as ex:
+        # recursively match redirects
+        return get_view_function(app, ex.new_url, method)
+    except (MethodNotAllowed, NotFound):
+        # no match
+        return None
+
+    try:
+        return app.view_functions[match[0]]
+    except KeyError:
+        # no view is associated with the endpoint
+        return None
 
 
 def _before_request():

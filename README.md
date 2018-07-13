@@ -55,6 +55,7 @@ Data included by default
 | status | 404 | |
 | request_user_agent | curl/7.38.0 | |
 | request_total | 0.23s | |
+| handler | sample_app.views.main.landing_page | The view function that handled the request. |
 | database_query_time | 0.18s | Only if sqlalchemy is used. The total time spent on executing db queries (excluding commit) |
 | database_executes | 3 | Only if sqlalchemy is used. How many individual execute statements were sent to the database. Proxy for number of roundtrips. |
 | error | IndexError | Only if the request fails with an uncaught exception. |

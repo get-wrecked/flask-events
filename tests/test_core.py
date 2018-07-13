@@ -18,6 +18,7 @@ def test_logger_unconfigured(client):
     assert test_outlet.event_data['request_user_agent'].startswith('werkzeug')
     assert test_outlet.event_data['status'] == 200
     assert 0 < test_outlet.event_data['request_total'].value < 0.100
+    assert test_outlet.event_data['handler'] == 'tests.conftest.create_app.<locals>.main_route'
 
 
 def test_add(app):

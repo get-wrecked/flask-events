@@ -10,6 +10,7 @@ Changelog
 ## Added
 - If running on Heroku and the `runtime-dyno-metadata` labs feature is enabled the release version
   and slug commit will be included by default.
+- Added `handler` by default which is the qualified path to the function that handled the request.
 
 
 # 0.2.0 - 2018-07-10
