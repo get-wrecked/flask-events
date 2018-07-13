@@ -23,7 +23,11 @@ def test_logfmt(outlet):
 
 @pytest.mark.parametrize('event_data,expected_output', [
     ({'somekey': 1}, 'somekey=1'),
+    ({'somekey': 0}, 'somekey=0'),
     ({'empty': None}, 'empty='),
+    ({'true': True}, 'true=true'),
+    ({'false': False}, 'false=false'),
+    ({'float': 1.23456789}, 'float=1.2346'),
     ({'mykey': 'my custom value'}, 'mykey="my custom value"'),
 ])
 def test_logfmt_formatting(event_data, expected_output, outlet):

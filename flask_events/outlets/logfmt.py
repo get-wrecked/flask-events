@@ -1,3 +1,4 @@
+import numbers
 import re
 from collections import OrderedDict
 from logging import getLogger
@@ -34,10 +35,18 @@ class LogfmtOutlet(object):
 
 
 def format_key_value_pair(key, value):
-    if value:
-        value = str(value)
-    else:
+    if value is None:
         value = ''
+    elif value is True:
+        value = 'true'
+    elif value is False:
+        value = 'false'
+    elif isinstance(value, numbers.Integral):
+        value = str(value)
+    elif isinstance(value, numbers.Real):
+        value = '%.4f' % value
+    else:
+        value = str(value)
 
     should_quote = NEEDS_QUOTES_RE.search(value)
 
