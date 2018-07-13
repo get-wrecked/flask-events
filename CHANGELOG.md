@@ -1,7 +1,7 @@
 Changelog
 =========
 
-# UNRELEASED
+# 0.3.0 - 2018-07-13
 
 ## Fixed
 - The logfmt outlet now formats 0 correctly (previously it would be empty string),0 and outputs
