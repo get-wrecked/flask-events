@@ -1,6 +1,13 @@
 Changelog
 =========
 
+# UNRELEASED
+
+## Added
+- celery tasks can now be instrumented too! Use `.init_celery_app` instead of `.init_app` to
+  automatically instrument all celery tasks.
+
+
 # 0.3.0 - 2018-07-13
 
 ## Fixed
