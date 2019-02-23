@@ -1,7 +1,7 @@
 Changelog
 =========
 
-# UNRELEASED
+# 0.4.0 - 2019-02-23
 
 ## Added
 - celery tasks can now be instrumented too! Use `.init_celery_app` instead of `.init_app` to
