@@ -66,6 +66,22 @@ Data included by default
 | slug_commit | `5ca1ab1e` | If running on Heroku and the `runtime-dyno-metadata` labs feature is enabled, and the slug was built from a git commit. |
 
 
+Celery
+------
+
+flask-events can optionally also be used to instrument your celery tasks. Use `events.init_celery_app` instead of the standard `events.init_app`, and it'll automatically push an app context for your tasks and enable you to instrument them. When using celery the following data is instrumented automatically:
+
+| Data | Sample value | Notes |
+| ---- | ------------ | ----- |
+| task | `app.tasks.celery_task` | |
+| task_id | `80b74af9-4ebd-4a76-a750-9ede49682f4a` | |
+| state | `SUCCESS` | |
+| task_total | `1.4s` | |
+| retval | `True` | This is mostly for workers that use a result backend, otherwise it'll always be `None`. If the task raises an exception this will be the exception message. |
+
+In addition all arguments and keyword-arguments to the task is included by default. To disable this behavior, set `EVENTS_AUTOADD_CELERY_ARGS` to `False` in your app config.
+
+
 Development
 -----------
 
