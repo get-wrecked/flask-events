@@ -1,8 +1,10 @@
 import binascii
 import codecs
+import inspect
 import os
 import sys
 import time
+
 from collections import OrderedDict
 
 import libhoney
@@ -48,14 +50,81 @@ class Events(object):
             self.init_app(app)
 
         self.add_all_data = get_default_all_data()
+        self.autoadd_celery_args = True
 
 
     def init_app(self, app):
+        self._init(app)
+
         app.before_request(_before_request)
         app.after_request(_after_request)
         app.teardown_request(self._teardown_request)
         app.teardown_appcontext(self._teardown_appcontext)
 
+
+    def init_celery_app(self, app):
+        self._init(app)
+
+        self.autoadd_celery_args = app.config.get('EVENTS_AUTOADD_CELERY_ARGS', True)
+
+        from celery import signals
+
+        @signals.task_prerun.connect(weak=False)
+        def before_task(task=None, args=None, kwargs=None, **kw):
+            app.app_context().push()
+            store_prop('task_start_time', time.time())
+            self.add('task', task.name)
+
+            if not self.autoadd_celery_args:
+                return
+
+            if args:
+                signature = inspect.signature(task.run)
+                named_args = []
+                varargs_name = 'args'
+
+                for param_name, param in signature.parameters.items():
+                    if param.kind in (param.POSITIONAL_ONLY, param.POSITIONAL_OR_KEYWORD):
+                        named_args.append(param_name)
+                    elif param.kind == param.VAR_POSITIONAL:
+                        varargs_name = param_name
+                    else:
+                        break
+
+                for parameter, value in zip(named_args, args):
+                    self.add(parameter, value)
+
+                for index, vararg in enumerate(args[len(named_args):]):
+                    self.add('%s_%d' % (varargs_name, index), vararg)
+
+            if kwargs:
+                for key, val in kwargs.items():
+                    self.add(key, val)
+
+
+        @signals.task_postrun.connect(weak=False)
+        def after_task(retval=None, task_id=None, state=None, **kw):
+            task_start_time = get_prop('task_start_time')
+            self.add('state', state)
+            self.add('retval', retval)
+            self.add('task_total', time.time() - task_start_time, unit='seconds')
+
+            params = self.add_all_data.copy()
+
+            # Add the task_id last to try to keep the generally most relevant data first
+            self.add('task_id', task_id)
+
+            request_extras = get_prop('request_extras')
+            if request_extras is not None:
+                params.update(request_extras)
+
+            for outlet in self.outlets:
+                outlet.handle(params)
+
+            app.app_context().pop()
+
+
+    def _init(self, app):
         self.outlets = [LogfmtOutlet(app.name)]
 
         libhoney_key = app.config.get('EVENTS_HONEYCOMB_KEY')
