@@ -14,6 +14,7 @@ from werkzeug.routing import RequestRedirect, MethodNotAllowed, NotFound
 from . import UnitedMetric
 from ._version import __version__
 from .outlets import LogfmtOutlet, LibhoneyOutlet
+from .anonymizer import Anonymizer
 
 HAS_SQLALCHEMY = False
 try:
@@ -202,8 +203,14 @@ def get_default_params():
     if request.args:
         full_path += '?' + request.query_string.decode('utf-8', ERROR_HANDLER)
 
+    access_route = request.access_route
+    anonymizer = get_anonymizer()
+    if anonymizer and access_route:
+        first_address = access_route[0]
+        access_route = [anonymizer.anonymize(first_address)] + access_route[1:]
+
     params = OrderedDict((
-        ('fwd', ','.join(request.access_route)),
+        ('fwd', ','.join(access_route)),
         ('method', request.method),
         ('path', full_path),
         ('status', get_prop('response_status', 500)),
@@ -244,6 +251,29 @@ def get_view_function(app, url, method):
     except KeyError:
         # no view is associated with the endpoint
         return None
+
+
+def get_anonymizer():
+    app_context = stack.top
+    if app_context is None:
+        return None
+
+    anonymizer = getattr(app_context, 'flask_events_anonymizer', None)
+    if anonymizer:
+        return anonymizer
+
+    anonymizer_config = current_app.config.get('EVENTS_ANONYMIZE_IPS', False)
+    if not anonymizer_config:
+        return None
+
+    if anonymizer_config is True:
+        anonymizer = Anonymizer()
+    else:
+        anonymizer = Anonymizer(**anonymizer_config)
+
+    app_context.flask_events_anonymizer = anonymizer
+
+    return anonymizer
 
 
 def _before_request():

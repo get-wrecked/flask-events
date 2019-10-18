@@ -1,11 +1,12 @@
 import os
 from unittest import mock
 
+import pytest
 from flask import Flask
 
 from flask_events import Events, UnitedMetric
 
-from .conftest import app_factory
+from .conftest import app_factory, create_app, CapturingOutlet
 
 
 def test_logger_unconfigured(client):
@@ -19,6 +20,46 @@ def test_logger_unconfigured(client):
     assert test_outlet.event_data['status'] == 200
     assert 0 < test_outlet.event_data['request_total'].value < 0.100
     assert test_outlet.event_data['handler'] == 'tests.conftest.create_app.<locals>.main_route'
+
+
+
+@pytest.mark.parametrize('forwarded_for,expected', [
+    ('1.2.3.4,5.6.7.8', '1.2.3.0,5.6.7.8'),
+    ('2001:1db8:85a3:3a4b:1a2a:8a2e:0370:7334', '2001:1db8:85a3::'),
+])
+def test_anonymize_ips(forwarded_for, expected):
+    app = create_app()
+    app.config['EVENTS_ANONYMIZE_IPS'] = True
+    events = Events(app)
+    app.test_outlet = CapturingOutlet()
+    events.outlets = [app.test_outlet]
+    with app.test_client() as client:
+        response = client.get('/', headers={
+            'X-Forwarded-For': forwarded_for,
+        })
+    assert response.status_code == 200
+    assert client.application.test_outlet.event_data['fwd'] == expected
+
+
+@pytest.mark.parametrize('forwarded_for,expected', [
+    ('1.2.3.4,5.6.7.8', '1.2.0.0,5.6.7.8'),
+    ('2001:1db8:85a3:3a4b:1a2a:8a2e:0370:7334', '2001:1db8:85a3:3a4b::'),
+])
+def test_anonymize_ips_custom_masks(forwarded_for, expected):
+    app = create_app()
+    app.config['EVENTS_ANONYMIZE_IPS'] = {
+        'ipv4_mask': '255.255.0.0',
+        'ipv6_mask': 'ffff:ffff:ffff:ffff:0000:0000:0000:0000', # preserves the SLA
+    }
+    events = Events(app)
+    app.test_outlet = CapturingOutlet()
+    events.outlets = [app.test_outlet]
+    with app.test_client() as client:
+        response = client.get('/', headers={
+            'X-Forwarded-For': forwarded_for,
+        })
+    assert response.status_code == 200
+    assert client.application.test_outlet.event_data['fwd'] == expected
 
 
 def test_add(app):
