@@ -2,10 +2,10 @@ sudo: false
 language: python
 cache: pip
 python:
-  - 3.4
   - 3.5
   - 3.6
-  - 3.6-dev
+  - 3.7
+  - 3.7-dev
   - nightly
 install: ./configure
 script: ./test
