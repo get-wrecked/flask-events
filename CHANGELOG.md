@@ -1,6 +1,12 @@
 Changelog
 =========
 
+# UNRELEASED
+
+## Removed
+- Support for python 3.4.
+
+
 # 0.4.0 - 2019-02-23
 
 ## Added

@@ -11,7 +11,7 @@ create_virtualenv () {
         || virtualenv venv -p $(which python3)
 
     # needed to correctly parse install_requires with version requirements
-    ./venv/bin/pip install -U setuptools
+    ./venv/bin/pip install -U setuptools pip
 
     ./venv/bin/pip install -r dev-requirements.txt
 }

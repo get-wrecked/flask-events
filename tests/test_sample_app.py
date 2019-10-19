@@ -42,7 +42,7 @@ def test_sample_app_crash(sample_app_client):
 
     assert response.status_code == 500
     assert len(logs.records) == 2 # flask also logs the error
-    assert logs.records[0].name == 'flask.app'
+    assert logs.records[0].name == 'sample_app' # The flask default logger
     assert logs.records[1].name == 'sample_app.canonical'
     assert 'error=ValueError error_msg="no message"' in logs.records[1].msg
 
