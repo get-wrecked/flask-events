@@ -203,14 +203,8 @@ def get_default_params():
     if request.args:
         full_path += '?' + request.query_string.decode('utf-8', ERROR_HANDLER)
 
-    access_route = request.access_route
-    anonymizer = get_anonymizer()
-    if anonymizer and access_route:
-        first_address = access_route[0]
-        access_route = [anonymizer.anonymize(first_address)] + access_route[1:]
-
     params = OrderedDict((
-        ('fwd', ','.join(access_route)),
+        ('fwd', ','.join(get_access_route())),
         ('method', request.method),
         ('path', full_path),
         ('status', get_prop('response_status', 500)),
@@ -226,6 +220,16 @@ def get_default_params():
         params['request_id'] = request_id
 
     return params
+
+
+def get_access_route():
+    access_route = request.access_route
+    anonymizer = get_anonymizer()
+    if not anonymizer or not access_route:
+        return access_route
+
+    first_address = access_route[0]
+    return [anonymizer.anonymize(first_address)] + access_route[1:]
 
 
 def get_view_function(app, url, method):
