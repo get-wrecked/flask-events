@@ -6,6 +6,11 @@ Changelog
 ## Removed
 - Support for python 3.4.
 
+## Added
+- You can turn on opt-in anonymization of IPs in the default context by setting
+  `EVENTS_ANONYMIZE_IPS` to `True` (default settings), or a dict with the keys `ipv4_mask` and
+  `ipv6_mask` to customize the masks used.
+
 
 # 0.4.0 - 2019-02-23
 
