@@ -1,7 +1,7 @@
 Changelog
 =========
 
-# UNRELEASED
+# 0.5.0 - 2019-10-19
 
 ## Removed
 - Support for python 3.4.
