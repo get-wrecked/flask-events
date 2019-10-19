@@ -301,14 +301,14 @@ def get_context():
     app_context = stack.top
 
     if app_context is None:
-        return {}
+        return None
 
-    _context = getattr(app_context, 'flask-events', None)
-    if _context is None:
-        _context = {}
-        setattr(app_context, 'flask-events', _context)
+    context = getattr(app_context, 'flask-events', None)
+    if context is None:
+        context = {}
+        setattr(app_context, 'flask-events', context)
 
-    return _context
+    return context
 
 
 if HAS_SQLALCHEMY:
