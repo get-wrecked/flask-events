@@ -4,6 +4,7 @@ import inspect
 import os
 import sys
 import time
+import logging
 
 from collections import OrderedDict
 
@@ -305,7 +306,8 @@ def get_context():
     app_context = stack.top
 
     if app_context is None:
-        return None
+        logging.warning('flask-events used outside of app context, ignoring')
+        return {}
 
     context = getattr(app_context, 'flask-events', None)
     if context is None:
