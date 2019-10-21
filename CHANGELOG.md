@@ -1,7 +1,7 @@
 Changelog
 =========
 
-# UNRELEASED
+# 0.5.1 - 2019-10-21
 
 ## Changed
 - Before 0.5.0 flask-events would silently ignore being used outside the app context. With 0.5.0
