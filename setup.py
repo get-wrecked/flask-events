@@ -23,6 +23,7 @@ setup(
         'libhoney >= 1.3.0',
     ],
     packages=find_packages(),
+    license='Hippocratic-2.1',
     classifiers=[
         # 'Development Status :: 1 - Planning',
         # 'Development Status :: 2 - Pre-Alpha',
@@ -35,7 +36,6 @@ setup(
         'Framework :: Flask',
         'Intended Audience :: Developers',
         'Intended Audience :: System Administrators',
-        'License :: OSI Approved :: MIT License',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3 :: Only',
         'Programming Language :: Python :: 3.5',

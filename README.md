@@ -89,3 +89,10 @@ Development
 
     $ ./configure
     $ ./test
+
+
+License
+-------
+
+This project is licensed under the Hippocratic License, an Ethical Source license that
+specifically prohibits the use of software to violate universal standards of human rights.
