@@ -5,6 +5,7 @@ Changelog
 
 ## Added
 - `events.instrument()` added as a decorator you can use to instrument a single function call.
+- Official support for python 3.8.
 
 
 # 0.5.1 - 2019-10-21
