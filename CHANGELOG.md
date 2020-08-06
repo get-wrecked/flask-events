@@ -1,7 +1,7 @@
 Changelog
 =========
 
-# UNRELEASED
+# 0.6.0 - 2020-08-06
 
 ## Changed
 - License changed from MIT to Hippocratic.
