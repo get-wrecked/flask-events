@@ -3,6 +3,9 @@ Changelog
 
 # UNRELEASED
 
+## Changed
+- License changed from MIT to Hippocratic.
+
 ## Added
 - `events.instrument()` added as a decorator you can use to instrument a single function call.
 - Official support for python 3.8.
