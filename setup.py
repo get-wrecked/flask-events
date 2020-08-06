@@ -17,7 +17,7 @@ setup(
     version=version,
     author='Tarjei Husøy',
     author_email='git@thusoy.com',
-    url='https://github.com/megacool/flask-events',
+    url='https://github.com/get-wrecked/flask-events',
     description="Easy structured logging and metrics collection for Flask",
     install_requires=[
         'libhoney >= 1.3.0',
