@@ -83,28 +83,7 @@ class Events:
             if not self.autoadd_celery_args:
                 return
 
-            if args:
-                signature = inspect.signature(task.run)
-                named_args = []
-                varargs_name = 'args'
-
-                for param_name, param in signature.parameters.items():
-                    if param.kind in (param.POSITIONAL_ONLY, param.POSITIONAL_OR_KEYWORD):
-                        named_args.append(param_name)
-                    elif param.kind == param.VAR_POSITIONAL:
-                        varargs_name = param_name
-                    else:
-                        break
-
-                for parameter, value in zip(named_args, args):
-                    self.add(parameter, value)
-
-                for index, vararg in enumerate(args[len(named_args):]):
-                    self.add('%s_%d' % (varargs_name, index), vararg)
-
-            if kwargs:
-                for key, val in kwargs.items():
-                    self.add(key, val)
+            self.add_function_arguments(task.run, args, kwargs)
 
 
         @signals.task_postrun.connect(weak=False)
@@ -156,35 +135,38 @@ class Events:
         self.add_all_data[key] = value
 
 
+    def add_function_arguments(self, func, args, kwargs):
+        if args:
+            signature = inspect.signature(func)
+            named_args = []
+            varargs_name = 'args'
+
+            for param_name, param in signature.parameters.items():
+                if param.kind in (param.POSITIONAL_ONLY, param.POSITIONAL_OR_KEYWORD):
+                    named_args.append(param_name)
+                elif param.kind == param.VAR_POSITIONAL:
+                    varargs_name = param_name
+                else:
+                    break
+
+            for parameter, value in zip(named_args, args):
+                self.add(parameter, value)
+
+            for index, vararg in enumerate(args[len(named_args):]):
+                self.add('%s_%d' % (varargs_name, index), vararg)
+
+        if kwargs:
+            for key, val in kwargs.items():
+                self.add(key, val)
+
+
     def instrument(self):
         def wrapper(func):
             @functools.wraps(func)
             def instrumented_func(*args, **kwargs):
                 start_time = time.time()
                 self.add('func_name', func.__name__)
-
-                if args:
-                    signature = inspect.signature(func)
-                    named_args = []
-                    varargs_name = 'args'
-
-                    for param_name, param in signature.parameters.items():
-                        if param.kind in (param.POSITIONAL_ONLY, param.POSITIONAL_OR_KEYWORD):
-                            named_args.append(param_name)
-                        elif param.kind == param.VAR_POSITIONAL:
-                            varargs_name = param_name
-                        else:
-                            break
-
-                    for parameter, value in zip(named_args, args):
-                        self.add(parameter, value)
-
-                    for index, vararg in enumerate(args[len(named_args):]):
-                        self.add('%s_%d' % (varargs_name, index), vararg)
-
-                if kwargs:
-                    for key, val in kwargs.items():
-                        self.add(key, val)
+                self.add_function_arguments(func, args, kwargs)
 
                 try:
                     func(*args, **kwargs)
