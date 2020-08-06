@@ -5,6 +5,8 @@ from testfixtures import LogCapture
 
 from sample_app import create_app, db
 
+# pylint: disable=redefined-outer-name
+
 
 def test_sample_app(sample_app_client):
     with LogCapture() as logs:

@@ -23,6 +23,7 @@ load-plugins=
 disable=missing-docstring,
     bad-continuation,
     star-args,
+    not-callable, # Would be caught by tests
     I
 
 [REPORTS]
@@ -80,7 +81,7 @@ attr-rgx=.*
 argument-rgx=[a-z_][a-z0-9_]{2,30}$
 
 # Regular expression which should only match correct variable names
-variable-rgx=[a-z_][a-z0-9_]{2,30}$
+variable-rgx=([a-z_][a-z0-9_]{2,30}$|ip)
 
 # Regular expression which should only match correct list comprehension /
 # generator expression variable names

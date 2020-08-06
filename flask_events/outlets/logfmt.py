@@ -10,7 +10,7 @@ from ..utils import humanize_size
 NEEDS_QUOTES_RE = re.compile(r'[\s=]')
 
 
-class LogfmtOutlet(object):
+class LogfmtOutlet:
 
     def __init__(self, base_logger):
         self.logger = getLogger('%s.canonical' % base_logger)

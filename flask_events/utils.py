@@ -7,21 +7,21 @@ UNITS = (
 )
 
 
-def humanize_size(s):
+def humanize_size(size):
     """Convert bytes to human-readable form (e.g. kB, MB).
     Lifted from celery.utils.debug
     """
     return next(
-        '{0}{1}'.format(_hfloat(s / div if div else s), unit)
-        for div, unit in UNITS if s >= div
+        '{0}{1}'.format(_hfloat(size / div if div else size), unit)
+        for div, unit in UNITS if size >= div
     )
 
 
-def _hfloat(f, p=4):
+def _hfloat(value, precision=4):
     """Convert float to value suitable for humans.
 
-    :keyword p: Float precision.
+    :keyword precision: Float precision.
 
     """
-    i = int(f)
-    return i if i == f else '{0:.{p}}'.format(f, p=p)
+    i = int(value)
+    return i if i == value else '{0:.{precision}}'.format(value, precision=precision)

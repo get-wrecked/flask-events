@@ -21,10 +21,9 @@ class Anonymizer:
         if address.version == 6:
             if address.ipv4_mapped:
                 return self._anonymize_mapped(address)
-            else:
-                return self._anonymize_address(address, self.ipv6_mask)
+            return _anonymize_address(address, self.ipv6_mask)
 
-        return self._anonymize_address(address, self.ipv4_mask)
+        return _anonymize_address(address, self.ipv4_mask)
 
 
     def _anonymize_mapped(self, address):
@@ -36,8 +35,8 @@ class Anonymizer:
         return ''.join(masked_ip)
 
 
-    def _anonymize_address(self, address, mask):
-        masked_ip = bytearray()
-        for original_byte, mask_byte in zip(address.packed, mask.packed):
-            masked_ip.append(original_byte & mask_byte)
-        return ip_address(bytes(masked_ip)).compressed
+def _anonymize_address(address, mask):
+    masked_ip = bytearray()
+    for original_byte, mask_byte in zip(address.packed, mask.packed):
+        masked_ip.append(original_byte & mask_byte)
+    return ip_address(bytes(masked_ip)).compressed

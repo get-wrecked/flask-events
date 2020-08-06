@@ -9,7 +9,7 @@ from flask_events import Events
 # Ensure warnings are treated as errors when running tests
 warnings.filterwarnings('error', module='flask_events')
 
-class CapturingOutlet(object):
+class CapturingOutlet:
     def __init__(self):
         self.event_data = None
 

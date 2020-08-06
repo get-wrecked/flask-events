@@ -40,7 +40,7 @@ else:
     ERROR_HANDLER = 'backslashreplace'
 
 
-class Events(object):
+class Events:
     '''
     Helper class to generate structured log data for each request.
     '''
@@ -49,6 +49,8 @@ class Events(object):
     # kept as methods since the API is better that way.
 
     def __init__(self, app=None):
+        self.outlets = []
+
         if app is not None:
             self.init_app(app)
 
@@ -70,10 +72,10 @@ class Events(object):
 
         self.autoadd_celery_args = app.config.get('EVENTS_AUTOADD_CELERY_ARGS', True)
 
-        from celery import signals
+        from celery import signals # pylint: disable=import-outside-toplevel
 
         @signals.task_prerun.connect(weak=False)
-        def before_task(task=None, args=None, kwargs=None, **kw):
+        def before_task(task=None, args=None, kwargs=None, **kw): # pylint: disable=unused-argument
             app.app_context().push()
             store_prop('task_start_time', time.time())
             self.add('task', task.name)
@@ -106,7 +108,7 @@ class Events(object):
 
 
         @signals.task_postrun.connect(weak=False)
-        def after_task(retval=None, task_id=None, state=None, **kw):
+        def after_task(retval=None, task_id=None, state=None, **kw): # pylint: disable=unused-argument
             task_start_time = get_prop('task_start_time')
             self.add('state', state)
             self.add('retval', retval)
@@ -128,7 +130,8 @@ class Events(object):
 
 
     def _init(self, app):
-        self.outlets = [LogfmtOutlet(app.name)]
+        self.outlets.clear() # In case of multiple init
+        self.outlets.append(LogfmtOutlet(app.name))
 
         libhoney_key = app.config.get('EVENTS_HONEYCOMB_KEY')
         libhoney_dataset = app.config.get('EVENTS_HONEYCOMB_DATASET', app.name)
@@ -204,7 +207,7 @@ class Events(object):
         return wrapper
 
 
-    def _teardown_request(self, exception):
+    def _teardown_request(self, exception): # pylint: disable=unused-argument
         params = get_default_params()
         for key, val in params.items():
             self.add(key, val)

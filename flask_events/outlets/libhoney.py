@@ -3,7 +3,7 @@ import socket
 from ..events import UnitedMetric
 
 
-class LibhoneyOutlet(object):
+class LibhoneyOutlet:
 
     def __init__(self, libhoney_client):
         self.libhoney_client = libhoney_client

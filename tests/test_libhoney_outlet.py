@@ -1,7 +1,7 @@
 import socket
+from unittest import mock
 
 import pytest
-from unittest import mock
 
 from flask_events import UnitedMetric
 from flask_events.outlets import LibhoneyOutlet

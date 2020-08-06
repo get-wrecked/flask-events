@@ -6,14 +6,16 @@ from flask_events import Events
 
 from .conftest import CapturingOutlet
 
+# pylint: disable=redefined-outer-name
+
 
 @celery.task(name='test_task')
-def fake_test_task(posarg, *args, keyed=None, **kwargs):
+def fake_test_task(posarg, *args, keyed=None, **kwargs): # pylint: disable=unused-argument
     pass
 
 
 @celery.task(name='test-pos-or-kwargs')
-def pos_or_kwargs(posarg, either=None, *varargs):
+def pos_or_kwargs(posarg, either=None, *varargs): # pylint: disable=unused-argument
     pass
 
 
@@ -89,5 +91,5 @@ def clean_celery_signals():
 
 
 def clean_celery_signal_receivers(signal):
-    for receiver in signal._live_receivers(None):
+    for receiver in signal._live_receivers(None): # pylint: disable=protected-access
         signal.disconnect(receiver)
