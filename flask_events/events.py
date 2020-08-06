@@ -1,10 +1,11 @@
 import binascii
 import codecs
+import functools
 import inspect
+import logging
 import os
 import sys
 import time
-import logging
 
 from collections import OrderedDict
 
@@ -150,6 +151,57 @@ class Events(object):
         if unit is not None:
             value = UnitedMetric(value, unit)
         self.add_all_data[key] = value
+
+
+    def instrument(self):
+        def wrapper(func):
+            @functools.wraps(func)
+            def instrumented_func(*args, **kwargs):
+                start_time = time.time()
+                self.add('func_name', func.__name__)
+
+                if args:
+                    signature = inspect.signature(func)
+                    named_args = []
+                    varargs_name = 'args'
+
+                    for param_name, param in signature.parameters.items():
+                        if param.kind in (param.POSITIONAL_ONLY, param.POSITIONAL_OR_KEYWORD):
+                            named_args.append(param_name)
+                        elif param.kind == param.VAR_POSITIONAL:
+                            varargs_name = param_name
+                        else:
+                            break
+
+                    for parameter, value in zip(named_args, args):
+                        self.add(parameter, value)
+
+                    for index, vararg in enumerate(args[len(named_args):]):
+                        self.add('%s_%d' % (varargs_name, index), vararg)
+
+                if kwargs:
+                    for key, val in kwargs.items():
+                        self.add(key, val)
+
+                try:
+                    func(*args, **kwargs)
+                except Exception as exc: # pylint: disable=broad-except
+                    self.add('error', exc.__class__.__name__)
+                    self.add('error_msg', str(exc))
+                finally:
+                    self.add('duration', time.time() - start_time, unit='seconds')
+
+                    params = self.add_all_data.copy()
+
+                    request_extras = get_prop('request_extras')
+                    if request_extras is not None:
+                        params.update(request_extras)
+
+                    for outlet in self.outlets:
+                        outlet.handle(params)
+
+            return instrumented_func
+        return wrapper
 
 
     def _teardown_request(self, exception):

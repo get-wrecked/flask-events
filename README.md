@@ -43,6 +43,8 @@ If you're using SQLAlchemy query timing from the database is tracked automatical
 
 There is a sample app in `sample_app.py` you can inspect and fire up if you want to play around and learn how it works.
 
+In addition to the automatic instrumentation of http handlers you can also instrument calls to any function by addding the `events.instrument()` decorator. This can be useful if you want to instrument custom CLI commands f. ex.
+
 
 Data included by default
 ------------------------

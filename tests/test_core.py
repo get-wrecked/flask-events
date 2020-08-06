@@ -132,3 +132,36 @@ def test_default_heroku_env():
             app.preprocess_request()
         assert app.test_outlet.event_data['release_version'] == 'v12'
         assert app.test_outlet.event_data['slug_commit'] == '5ca1ab1e'
+
+
+def test_instrument_func(app):
+    @app.events.instrument()
+    def some_func(first_arg, *args, **kwargs): # pylint: disable=unused-argument
+        pass
+
+    with app.app_context():
+        some_func('bar', 'zoo', thing=2)
+
+    assert app.test_outlet.event_data['func_name'] == 'some_func'
+    assert app.test_outlet.event_data['first_arg'] == 'bar'
+    assert app.test_outlet.event_data['args_0'] == 'zoo'
+    assert app.test_outlet.event_data['thing'] == 2
+    assert 'duration' in app.test_outlet.event_data
+    assert 'error' not in app.test_outlet.event_data
+
+
+def test_instrument_func_with_exception(app):
+    @app.events.instrument()
+    def some_func():
+        raise ValueError('thing broke')
+
+    with app.app_context():
+        try:
+            some_func()
+        except ValueError:
+            pass
+
+    assert app.test_outlet.event_data['func_name'] == 'some_func'
+    assert app.test_outlet.event_data['error'] == 'ValueError'
+    assert app.test_outlet.event_data['error_msg'] == 'thing broke'
+    assert 'duration' in app.test_outlet.event_data
