@@ -1,6 +1,12 @@
 Changelog
 =========
 
+# UNRELEASED
+
+## Changed
+- Final release with compatibility for newer flask versions. Also marks the project inactive, use OTel for new projects.
+
+
 # 0.6.0 - 2020-08-06
 
 ## Changed

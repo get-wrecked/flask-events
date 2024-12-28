@@ -1,5 +1,7 @@
-Flask-Events
+(deprecated) Flask-Events
 ===============
+
+*Deprecation notice*: This project predates opentelemetry (OTel) and its tooling to solve the same problem, use that instead for new projects.
 
 Flask middleware to help log with structured event logging to multiple outlets (logfmt, honeycomb, etc).
 
