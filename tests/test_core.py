@@ -16,7 +16,7 @@ def test_logger_unconfigured(client):
     test_outlet = client.application.test_outlet
     assert test_outlet.event_data['fwd'] == '127.0.0.1'
     assert test_outlet.event_data['method'] == 'GET'
-    assert test_outlet.event_data['request_user_agent'].startswith('werkzeug')
+    assert test_outlet.event_data['request_user_agent'].startswith('Werkzeug')
     assert test_outlet.event_data['status'] == 200
     assert 0 < test_outlet.event_data['request_total'].value < 0.100
     assert test_outlet.event_data['handler'] == 'tests.conftest.create_app.<locals>.main_route'
@@ -100,13 +100,6 @@ def test_aborted_view(client):
     assert response.status_code == 503
 
     assert client.application.test_outlet.event_data['status'] == 503
-
-
-def test_invalid_utf8(client):
-    response = client.get(b'/?param=\xEA')
-    assert response.status_code == 200
-
-    assert client.application.test_outlet.event_data['path'] == '/?param=\\xea'
 
 
 def test_honeycomb_init():

@@ -1,5 +1,4 @@
 import binascii
-import codecs
 import functools
 import inspect
 import logging
@@ -10,8 +9,9 @@ import time
 from collections import OrderedDict
 
 import libhoney
-from flask import current_app, request, _app_ctx_stack as stack
-from werkzeug.routing import RequestRedirect, MethodNotAllowed, NotFound
+from flask import current_app, request, g
+from werkzeug.routing import RequestRedirect
+from werkzeug.exceptions import MethodNotAllowed, NotFound
 
 from . import UnitedMetric
 from ._version import __version__
@@ -26,18 +26,6 @@ try:
 except ImportError:
     pass
 
-
-if sys.version_info < (3, 5, 0):
-    ERROR_HANDLER = 'custom-backslashreplace'
-
-    def custom_backslashreplace(exception):
-        '''Backport of backslashreplace for decoding'''
-        unencodable_part = exception.object[exception.start:exception.end]
-        return '\\x' + binascii.hexlify(unencodable_part).decode('ascii'), exception.end
-
-    codecs.register_error(ERROR_HANDLER, custom_backslashreplace)
-else:
-    ERROR_HANDLER = 'backslashreplace'
 
 
 class Events:
@@ -235,12 +223,7 @@ def get_default_all_data():
 
 
 def get_default_params():
-    # Don't use request.full_path since it fails to decode invalid utf-8
-    # paths (as of werkzeug 0.15)
-    full_path = request.path
-    if request.args:
-        full_path += '?' + request.query_string.decode('utf-8', ERROR_HANDLER)
-
+    full_path = request.full_path.rstrip('?')
     params = OrderedDict((
         ('fwd', ','.join(get_access_route())),
         ('method', request.method),
@@ -296,11 +279,7 @@ def get_view_function(app, url, method):
 
 
 def get_anonymizer():
-    app_context = stack.top
-    if app_context is None:
-        return None
-
-    anonymizer = getattr(app_context, 'flask_events_anonymizer', None)
+    anonymizer = getattr(g, 'flask_events_anonymizer', None)
     if anonymizer:
         return anonymizer
 
@@ -313,7 +292,7 @@ def get_anonymizer():
     else:
         anonymizer = Anonymizer(**anonymizer_config)
 
-    app_context.flask_events_anonymizer = anonymizer
+    g.flask_events_anonymizer = anonymizer
 
     return anonymizer
 
@@ -340,16 +319,10 @@ def get_prop(key, default=None):
 
 
 def get_context():
-    app_context = stack.top
-
-    if app_context is None:
-        logging.warning('flask-events used outside of app context, ignoring')
-        return {}
-
-    context = getattr(app_context, 'flask-events', None)
+    context = getattr(g, 'flask_events', None)
     if context is None:
         context = {}
-        setattr(app_context, 'flask-events', context)
+        setattr(g, 'flask_events', context)
 
     return context
 
